@@ -1,4 +1,4 @@
-# EHDS Health Data Access Body
+# Tessera — an automated EHDS Health Data Access Body
 
 A prototype access body for the European Health Data Space (Track 3). It takes a request as JSON and
 automatically:

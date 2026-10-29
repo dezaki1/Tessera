@@ -43,7 +43,7 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
         app.state.body = access_body or AccessBody(workdir=workdir)
         yield
 
-    app = FastAPI(title="EHDS Health Data Access Body", lifespan=lifespan)
+    app = FastAPI(title="Tessera: EHDS Health Data Access Body", lifespan=lifespan)
 
     def body() -> AccessBody:
         return app.state.body
