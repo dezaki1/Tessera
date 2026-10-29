@@ -28,7 +28,10 @@ class AccessBody:
         self.store = store or load_store(data_dir)
         self.engine = Engine(self.store)
         self.terminology = build_terminology(self.store.vocabulary)
-        self.parser = parser or RuleParser(self.terminology)
+        if parser is None:
+            from .llm import HybridParser, LLMClient
+            parser = HybridParser(RuleParser(self.terminology), LLMClient(self.store.vocabulary))
+        self.parser = parser
         workdir = Path(workdir)
         self.audit = AuditLog(workdir / "audit" / "audit.jsonl")
         self.spe = SPEManager(self.engine, workdir / "spe", self.audit)
