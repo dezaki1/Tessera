@@ -1,0 +1,17 @@
+{
+  "id": "H01",
+  "applicant": {
+    "name": "Test Applicant",
+    "organisation": "University research group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We study hip fractures to plan rehabilitation capacity in hospitals.",
+  "question": "How many inpatient stays with a femur fracture started in 2025, by hospital?",
+  "definitions": [
+    "Inpatient stay = encounter with type 'inpatient'.",
+    "Count stays (not patients) whose start_date is in 2025.",
+    "Report per hospital: inpatient stays with a main diagnosis (primary_icd10) starting with S72."
+  ]
+}

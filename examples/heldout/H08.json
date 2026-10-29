@@ -1,0 +1,15 @@
+{
+  "id": "H08",
+  "applicant": {
+    "name": "Test Applicant",
+    "organisation": "University research group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Quality improvement research on diabetes control.",
+  "question": "Among adults with type 2 diabetes, how many have a latest HbA1c above 8%, by hospital and sex?",
+  "definitions": [
+    "Report per hospital and sex: adults with type 2 diabetes who have an HbA1c, how many of them have a latest HbA1c above 8% and that share in %."
+  ]
+}

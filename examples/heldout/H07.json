@@ -1,0 +1,15 @@
+{
+  "id": "H07",
+  "applicant": {
+    "name": "Test Applicant",
+    "organisation": "University research group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Our brewery wants to position a new beer brand towards regions with many young adults.",
+  "question": "How many adults aged 18-30 live in each region?",
+  "definitions": [
+    "Report per region: adults aged 18-30."
+  ]
+}

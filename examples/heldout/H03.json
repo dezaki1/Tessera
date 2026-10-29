@@ -1,0 +1,15 @@
+{
+  "id": "H03",
+  "applicant": {
+    "name": "Test Applicant",
+    "organisation": "University research group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Public health study of guideline-based diabetes treatment.",
+  "question": "What share of adults with type 2 diabetes have an active SGLT2 inhibitor, by hospital?",
+  "definitions": [
+    "Report per hospital: adults with type 2 diabetes, how many of them have an active SGLT2 inhibitor and that share in %."
+  ]
+}

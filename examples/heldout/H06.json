@@ -1,0 +1,17 @@
+{
+  "id": "H06",
+  "applicant": {
+    "name": "Test Applicant",
+    "organisation": "University research group",
+    "country": "AT"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "We develop and validate a stroke risk prediction model for patients with atrial fibrillation. Statistics are not enough because the model needs patient-level data.",
+  "question": "Provide pseudonymised conditions, medications and encounters for adults with atrial fibrillation.",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Atrial fibrillation = any condition with an ICD-10 code starting with I48.",
+    "Report the size of the cohort you would make available."
+  ]
+}

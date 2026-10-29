@@ -1,0 +1,16 @@
+{
+  "id": "H05",
+  "applicant": {
+    "name": "Test Applicant",
+    "organisation": "University research group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Research on asthma care in Tyrol.",
+  "question": "How many patients in Tirol have asthma, by age band?",
+  "definitions": [
+    "Age bands on 31 December 2025: 0-17, 18-64, 65+.",
+    "Report per age band: patients with asthma."
+  ]
+}

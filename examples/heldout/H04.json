@@ -1,0 +1,16 @@
+{
+  "id": "H04",
+  "applicant": {
+    "name": "Test Applicant",
+    "organisation": "University research group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Official statistics on hospital use.",
+  "question": "How many inpatient stays with a main diagnosis of pneumonia started in 2024, by region?",
+  "definitions": [
+    "Count stays (not patients) whose start_date is in 2024.",
+    "Report per region: inpatient stays with a main diagnosis of pneumonia."
+  ]
+}

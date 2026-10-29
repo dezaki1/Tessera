@@ -1,0 +1,16 @@
+{
+  "id": "H02",
+  "applicant": {
+    "name": "Test Applicant",
+    "organisation": "University research group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Research on kidney function in heart failure to improve care.",
+  "question": "What is the mean eGFR of adults with heart failure, by hospital and sex?",
+  "definitions": [
+    "Use the latest eGFR per patient; patients without an eGFR are left out.",
+    "Report per hospital and sex: adults with heart failure who have an eGFR and their mean eGFR, one decimal."
+  ]
+}
