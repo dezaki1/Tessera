@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block role %}Staff view{% endblock %}
+{% block content %}
+<h1>Staff desk</h1>
+<p class="muted">Every decided request with its outcome. Open one for the rule trace, the interpreted query and the SQL.</p>
+<form method="post" action="/staff/run-samples"><button class="secondary">Process all sample requests</button></form>
+<div class="card" style="margin-top:16px">
+<table>
+  <tr><th>Request</th><th>Applicant</th><th>Decision</th><th>Articles</th><th>Status</th><th>Flags</th><th>Time</th></tr>
+  {% for r in results %}
+  <tr><td><a href="/staff/requests/{{ r.request_id }}">{{ r.request_id }}</a></td>
+      <td class="small">{{ r.applicant.organisation if r.applicant }}</td>
+      <td><span class="badge {{ r.decision }}">{{ r.decision.replace('_', ' ') }}</span></td>
+      <td>{{ r.articles|join(', ') }}</td><td><span class="badge {{ r.status }}">{{ r.status.replace('_', ' ') }}</span></td>
+      <td class="small">{{ r.staff.flags|length }}</td><td class="small">{{ r.staff.timing_ms }} ms</td></tr>
+  {% else %}<tr><td colspan="7" class="muted">No requests yet.</td></tr>{% endfor %}
+</table>
+</div>
+<h2>Audit log (latest 30)</h2>
+<div class="card scroll"><table class="small">
+  <tr><th>Time (UTC)</th><th>Event</th><th>Request</th><th>Actor</th><th>Detail</th></tr>
+  {% for e in audit %}<tr><td>{{ e.time }}</td><td>{{ e.event }}</td><td>{{ e.request_id }}</td><td>{{ e.actor }}</td>
+  <td>{{ e.target or e.status or e.decision or e.sql or '' }}</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ r.request_id }} · Decision{% endblock %}
+{% block role %}Applicant view{% endblock %}
+{% block content %}
+<p class="small"><a href="/">← New request</a> · <a href="/staff/requests/{{ r.request_id }}">Open as staff</a></p>
+<div class="card">
+  <h1>Request {{ r.request_id }}</h1>
+  <p class="muted">{{ r.applicant.name if r.applicant }}{% if r.applicant %}, {{ r.applicant.organisation }}{% endif %}</p>
+  <p><span class="badge decision {{ r.decision }}">{{ r.decision.replace('_', ' ') }}</span>
+     {% if r.status in ('needs_review', 'answered_with_warnings') %}<span class="badge {{ r.status }}">{{ r.status.replace('_', ' ') }}</span>{% endif %}</p>
+  <h2>Why</h2>
+  <p>{{ r.reason }}</p>
+  <table class="small">
+    {% for a, title in r.article_titles.items() %}<tr><td><strong>Art. {{ a }}</strong></td><td>{{ title }}</td></tr>{% endfor %}
+  </table>
+</div>
+
+{% if r.answer_table %}
+<div class="card">
+  <h2>Your answer (anonymised statistics)</h2>
+  {% include "_answer.html" %}
+  <p class="small muted">"&lt;10" means fewer than 10 patients (including none). "suppressed" means the value rests on
+  fewer than 10 patients and is withheld to protect privacy.</p>
+</div>
+{% endif %}
+
+{% if r.spe %}
+<div class="card">
+  <h2>Secure processing environment</h2>
+  <p>Cohort size: <strong>{{ r.spe.cohort_size }}</strong> patients (exact).</p>
+  <p>Patients included: {{ r.spe.contents.patients }}</p>
+  <p>Record types: {{ r.spe.contents.records|join(', ') }}</p>
+  <p><a class="button" href="{{ r.spe.url }}">Open the workspace</a></p>
+</div>
+{% endif %}
+
+{% if r.how_we_counted %}
+<div class="card">
+  <h2>How we counted</h2>
+  {% if r.how_we_counted.groups %}<p><strong>Groups:</strong> {{ r.how_we_counted.groups|join('; ') }}</p>{% endif %}
+  {% if r.how_we_counted.numbers %}
+  <table class="small">{% for n in r.how_we_counted.numbers %}<tr><td><strong>{{ n.label }}</strong></td><td>{{ n.definition }}</td></tr>{% endfor %}</table>
+  {% endif %}
+  {% if r.how_we_counted.active_medication %}<p class="small">A medication counts as active if {{ r.how_we_counted.active_medication }}.</p>{% endif %}
+  {% if r.how_we_counted.assumptions %}<h3>Assumptions</h3><ul class="tight small">{% for a in r.how_we_counted.assumptions %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
+</div>
+{% endif %}
+
+<div class="card"><h2>Notes</h2><ul class="tight">{% for n in r.notes %}<li>{{ n }}</li>{% endfor %}</ul></div>
+{% endblock %}

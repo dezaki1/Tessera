@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}EHDS Access Body{% endblock %}</title>
+<style>
+:root { --ink:#1d2433; --muted:#5b6475; --line:#d9dee7; --bg:#f6f7fa; --card:#fff; --accent:#1f4fa8;
+        --ok:#1d7a46; --ok-bg:#e5f4ea; --warn:#8a5a00; --warn-bg:#fdf3dc; --bad:#a32020; --bad-bg:#fbe7e7; --spe:#5a3aa8; --spe-bg:#efeafb; }
+* { box-sizing: border-box; }
+body { margin:0; font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+header { background:#13294b; color:#fff; padding:12px 24px; display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
+header strong { font-size:16px; } header a { color:#cfdcf5; text-decoration:none; } header a:hover { color:#fff; }
+header .role { margin-left:auto; font-size:13px; color:#9fb3d8; }
+main { max-width:1100px; margin:24px auto; padding:0 16px; }
+h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:17px; margin:24px 0 8px; } h3 { font-size:15px; margin:16px 0 6px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 20px; margin-bottom:16px; }
+.muted { color:var(--muted); } .small { font-size:13px; }
+.badge { display:inline-block; padding:3px 10px; border-radius:999px; font-weight:600; font-size:13px; }
+.REJECT { background:var(--bad-bg); color:var(--bad); } .APPROVE_STATISTICAL { background:var(--ok-bg); color:var(--ok); }
+.APPROVE_SPE { background:var(--spe-bg); color:var(--spe); } .needs_review, .answered_with_warnings { background:var(--warn-bg); color:var(--warn); }
+.decision { font-size:20px; padding:6px 14px; }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+th { background:#eef1f6; font-weight:600; } td.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.small-cell { color:var(--warn); font-style:italic; }
+.scroll { overflow-x:auto; }
+pre { background:#0f172a; color:#e2e8f0; padding:12px; border-radius:6px; overflow-x:auto; font-size:12.5px; white-space:pre-wrap; }
+textarea { width:100%; min-height:260px; font:13px ui-monospace, monospace; padding:8px; border:1px solid var(--line); border-radius:6px; }
+button, .button { background:var(--accent); color:#fff; border:0; padding:8px 14px; border-radius:6px; font-size:14px; cursor:pointer; text-decoration:none; display:inline-block; }
+button.secondary { background:#e6ebf4; color:var(--ink); } button.danger { background:var(--bad); }
+.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+.alert { border-left:4px solid var(--bad); background:var(--bad-bg); padding:12px 16px; border-radius:4px; margin-bottom:16px; }
+.info { border-left:4px solid var(--accent); background:#e8effb; padding:10px 14px; border-radius:4px; }
+ul.tight { margin:4px 0; padding-left:20px; } ul.tight li { margin:2px 0; }
+.trace td:first-child { white-space:nowrap; } .matched { color:var(--ok); font-weight:600; }
+a { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <strong>Health Data Access Body</strong>
+  <a href="/">Applicant portal</a>
+  <a href="/staff">Staff desk</a>
+  <span class="role">{% block role %}{% endblock %}</span>
+</header>
+<main>{% block content %}{% endblock %}</main>
+</body>
+</html>

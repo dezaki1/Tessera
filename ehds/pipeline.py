@@ -33,6 +33,7 @@ class AccessBody:
         self.audit = AuditLog(workdir / "audit" / "audit.jsonl")
         self.spe = SPEManager(self.engine, workdir / "spe", self.audit)
         self.results: dict[str, dict] = {}
+        self.requests: dict[str, dict] = {}
 
     def process(self, request: dict, actor: str = "applicant") -> dict:
         started = time.perf_counter()
@@ -78,6 +79,7 @@ class AccessBody:
         result["staff"]["timing_ms"] = round((time.perf_counter() - started) * 1000, 1)
         self.audit.write("decision", request_id, actor, decision=result["decision"], status=result["status"])
         self.results[request_id] = result
+        self.requests[request_id] = request
         return result
 
     def _statistics(self, parsed: ParsedRequest, result: dict) -> None:

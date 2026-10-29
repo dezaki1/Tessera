@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}SPE {{ r.request_id }}{% endblock %}
+{% block role %}Secure processing environment · {{ r.request_id }}{% endblock %}
+{% block content %}
+<p class="small"><a href="/requests/{{ r.request_id }}">← Decision</a></p>
+{% if blocked %}<div class="alert"><strong>Download blocked.</strong> {{ blocked }}</div>{% endif %}
+<div class="card">
+  <h1>Workspace for {{ r.request_id }}</h1>
+  <p class="muted">Pseudonymised records under a data permit (Art. 68). You can look at and analyse the data here.
+  Nothing can be downloaded (Art. 73); every attempt is logged.</p>
+  <p>Cohort: <strong>{{ manifest.cohort_size }}</strong> patients · {{ r.spe.contents.patients }}</p>
+  <table class="small" style="max-width:520px">
+    <tr><th>Table</th><th>Rows</th><th></th></tr>
+    {% for t, n in manifest.tables.items() %}<tr><td>{{ t }}</td><td class="num">{{ n }}</td>
+      <td><a href="?table={{ t }}">preview</a></td></tr>{% endfor %}
+  </table>
+  <form method="post" action="/spe/{{ r.request_id }}/download" style="margin-top:12px">
+    <button class="danger">Download data (CSV)</button>
+  </form>
+</div>
+{% if preview %}<div class="card scroll"><h2>{{ table }} (first 20 rows)</h2>
+<table class="small"><tr>{% for c in preview.columns %}<th>{{ c }}</th>{% endfor %}</tr>
+{% for row in preview.rows %}<tr>{% for v in row %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}</table></div>{% endif %}
+<div class="card">
+  <h2>Analyse inside the SPE</h2>
+  <form method="post" action="/spe/{{ r.request_id }}/query">
+    <textarea name="sql" style="min-height:90px">{{ sql or "SELECT count(DISTINCT patient_id) AS patients, round(avg(value), 2) AS mean_value FROM observations" }}</textarea>
+    <p><button>Run (read-only)</button></p>
+  </form>
+  {% if query_error %}<div class="alert">{{ query_error }}</div>{% endif %}
+  {% if query %}<div class="scroll"><table class="small"><tr>{% for c in query.columns %}<th>{{ c }}</th>{% endfor %}</tr>
+  {% for row in query.rows %}<tr>{% for v in row %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}</table></div>{% endif %}
+</div>
+<div class="card scroll"><h2>Access log for this workspace</h2><table class="small">
+  <tr><th>Time (UTC)</th><th>Event</th><th>Actor</th><th>Detail</th></tr>
+  {% for e in audit %}<tr><td>{{ e.time }}</td><td>{{ e.event }}</td><td>{{ e.actor }}</td><td>{{ e.target or e.sql or '' }}</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

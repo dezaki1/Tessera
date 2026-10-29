@@ -1,0 +1,11 @@
+{% set t = r.answer_table %}
+{% if t %}
+<div class="scroll"><table>
+  <tr>{% for d in t.dimensions %}<th>{{ d.replace('_', ' ')|capitalize }}</th>{% endfor %}
+      {% for c in t.columns %}<th>{{ c.label }}</th>{% endfor %}</tr>
+  {% for row in t.rows %}
+  <tr>{% for g in row.group %}<td>{{ g }}</td>{% endfor %}
+      {% for v in row['values'] %}<td class="num {% if v is string %}small-cell{% endif %}">{{ v }}</td>{% endfor %}</tr>
+  {% endfor %}
+</table></div>
+{% endif %}

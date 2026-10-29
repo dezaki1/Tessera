@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ r.request_id }} · Staff{% endblock %}
+{% block role %}Staff view{% endblock %}
+{% block content %}
+<p class="small"><a href="/staff">← Staff desk</a> · <a href="/requests/{{ r.request_id }}">Applicant view</a></p>
+<div class="card">
+  <h1>{{ r.request_id }} <span class="badge decision {{ r.decision }}">{{ r.decision.replace('_', ' ') }}</span>
+      <span class="badge {{ r.status }}">{{ r.status.replace('_', ' ') }}</span></h1>
+  <p class="muted">{{ r.applicant.name if r.applicant }}{% if r.applicant %}, {{ r.applicant.organisation }} ({{ r.applicant.country }}){% endif %}</p>
+  <p><strong>Purpose:</strong> {{ req.purpose }}</p>
+  <p><strong>Question:</strong> {{ req.question }}</p>
+  <p><strong>Requested as:</strong> {{ req.requested_as }} · {{ req.requested_format }}</p>
+  <p><strong>Reason given to the applicant:</strong> {{ r.reason }}</p>
+  <p class="small">Articles: {{ r.articles|join(', ') }} · Allowed purposes recognised: {{ r.staff.purposes|join(', ') or 'none' }} ·
+     Opted-out patients excluded: {{ r.staff.opted_out_excluded }} · Processing time: {{ r.staff.timing_ms }} ms</p>
+</div>
+{% if r.staff.flags %}<div class="alert"><strong>For review</strong><ul class="tight">{% for f in r.staff.flags %}<li>{{ f }}</li>{% endfor %}</ul></div>{% endif %}
+<div class="card">
+  <h2>Decision rules, in order</h2>
+  <table class="trace">
+    {% for f in r.staff.trace %}<tr><td>{{ f.rule }}</td><td class="{{ 'matched' if f.outcome == 'matched' }}">{{ f.outcome }}</td>
+    <td class="small">{% for m in f.matched %}“{{ m }}”{% if not loop.last %}, {% endif %}{% endfor %} {{ f.note }}</td></tr>{% endfor %}
+  </table>
+</div>
+<div class="card">
+  <h2>Definitions as interpreted <span class="small muted">(parser: {{ r.staff.parse.method }})</span></h2>
+  <table class="small">{% for name, d in r.staff.parse.concepts.items() %}<tr><td><strong>{{ name }}</strong></td><td>{{ d }}</td></tr>{% endfor %}</table>
+  {% if r.how_we_counted and r.how_we_counted.numbers %}
+  <h3>Numbers</h3><table class="small">{% for n in r.how_we_counted.numbers %}<tr><td><strong>{{ n.name }}</strong></td><td>{{ n.definition }}</td></tr>{% endfor %}</table>
+  {% endif %}
+  {% if r.staff.parse.assumptions %}<h3>Assumptions</h3><ul class="tight small">{% for a in r.staff.parse.assumptions %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
+  {% if r.staff.parse.unresolved %}<h3>Not interpreted</h3><ul class="tight small">{% for a in r.staff.parse.unresolved %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
+</div>
+{% if r.answer_table %}<div class="card"><h2>Released answer (after the small-cell rule)</h2>{% include "_answer.html" %}</div>{% endif %}
+{% if r.spe %}<div class="card"><h2>Secure processing environment</h2>
+  <p>Cohort {{ r.spe.cohort_size }} · tables: {% for t, n in r.spe.tables.items() %}{{ t }} ({{ n }}){% if not loop.last %}, {% endif %}{% endfor %}</p>
+  <a class="button" href="{{ r.spe.url }}">Open workspace</a></div>{% endif %}
+{% if r.staff.sql %}<div class="card"><h2>Generated SQL</h2>{% for q in r.staff.sql %}<pre>{{ q }}</pre>{% endfor %}</div>{% endif %}
+<div class="card"><details><summary><strong>Query spec (JSON)</strong></summary><pre>{{ spec_json }}</pre></details></div>
+<div class="card scroll"><h2>Audit trail</h2><table class="small">
+  <tr><th>Time (UTC)</th><th>Event</th><th>Actor</th><th>Detail</th></tr>
+  {% for e in audit %}<tr><td>{{ e.time }}</td><td>{{ e.event }}</td><td>{{ e.actor }}</td><td>{{ e.target or e.status or e.sql or '' }}</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

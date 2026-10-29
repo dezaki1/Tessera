@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block role %}Applicant view{% endblock %}
+{% block content %}
+<h1>Submit a request</h1>
+<p class="muted">Paste a request in JSON or pick one of the sample requests. The decision and, if approved, the
+anonymised answer are returned immediately.</p>
+<div class="grid">
+  <div class="card">
+    <h2>Sample requests</h2>
+    <table>
+      {% for s in samples %}
+      <tr><td><strong>{{ s.id }}</strong></td><td class="small">{{ s.applicant.organisation }}<br><span class="muted">{{ s.question }}</span></td>
+      <td><form method="post" action="/submit"><input type="hidden" name="sample" value="{{ s.id }}"><button>Submit</button></form></td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="card">
+    <h2>Your own request</h2>
+    <form method="post" action="/submit">
+      <textarea name="request_json" spellcheck="false">{{ template }}</textarea>
+      <p><button>Submit request</button></p>
+    </form>
+    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

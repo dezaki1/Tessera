@@ -110,11 +110,11 @@ class SPEManager:
 
     def query(self, request_id: str, sql: str, actor: str, limit: int = 200) -> dict:
         """Analysis inside the SPE: read-only SELECT on the workspace only."""
-        if not re.match(r"^\s*(select|with)\b", sql, re.I) or ";" in sql.strip().rstrip(";"):
-            raise ValueError("Only a single SELECT statement can be run inside the SPE.")
         if re.search(r"\b(copy|export|attach|install|load|read_csv|read_parquet|read_json|glob|httpfs|pragma)\b", sql, re.I):
             self.audit.write("spe_query_refused", request_id, actor, sql=sql)
-            raise DownloadBlocked("File and network access are not available inside the SPE.")
+            raise DownloadBlocked("File and network access are not available inside the SPE. This attempt has been logged.")
+        if not re.match(r"^\s*(select|with)\b", sql, re.I) or ";" in sql.strip().rstrip(";"):
+            raise ValueError("Only a single SELECT statement can be run inside the SPE.")
         with self._connect(request_id) as con:
             con.execute("SET enable_external_access = false")
             cur = con.execute(sql.strip().rstrip(";"))
