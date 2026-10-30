@@ -6,7 +6,7 @@
 <div class="card">
   <h1>{{ r.request_id }} <span class="badge decision {{ r.decision }}">{{ r.decision.replace('_', ' ') }}</span>
       <span class="badge {{ r.status }}">{{ r.status.replace('_', ' ') }}</span></h1>
-  <p class="muted">{{ r.applicant.name if r.applicant }}{% if r.applicant %}, {{ r.applicant.organisation }} ({{ r.applicant.country }}){% endif %}</p>
+  <p class="muted">{{ r.applicant.name if r.applicant }}{% if r.applicant %}, {{ r.applicant.organisation }}{% if r.applicant.country %} ({{ r.applicant.country }}){% endif %}{% endif %}</p>
   <p><strong>Purpose:</strong> {{ req.purpose }}</p>
   <p><strong>Question:</strong> {{ req.question }}</p>
   <p><strong>Requested as:</strong> {{ req.requested_as }} · {{ req.requested_format }}</p>
