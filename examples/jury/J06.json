@@ -1,0 +1,19 @@
+{
+  "id": "J06",
+  "submitted": "2026-11-02T11:00:00+01:00",
+  "applicant": {
+    "name": "Dr. Miriam Eder",
+    "organisation": "Federal Institute for Public Health, antimicrobial resistance programme",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "To plan an antibiotic stewardship programme for nursing homes we need to know how often older people are hospitalised for urinary tract infections.",
+  "question": "What share of women and men aged 65+ were admitted at least once with a urinary tract infection as main diagnosis?",
+  "definitions": [
+    "Older person = aged 65 or over on 31 December 2025.",
+    "UTI admission = an inpatient stay whose primary_icd10 starts with N39.",
+    "Share = older persons with at least one UTI admission / all older persons of the same sex x 100, one decimal.",
+    "Report per sex: persons aged 65 or over, those with at least one UTI admission, and the share in %."
+  ]
+}

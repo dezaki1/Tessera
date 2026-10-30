@@ -1,0 +1,19 @@
+{
+  "id": "J03",
+  "submitted": "2026-11-02T09:40:00+01:00",
+  "applicant": {
+    "name": "Mag. Andreas Pichler",
+    "organisation": "Regional Health Fund, hospital planning unit",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Capacity planning for cardiology beds: we need to see how heart failure admissions develop over time at each hospital.",
+  "question": "How many heart failure admissions did each hospital record per year?",
+  "definitions": [
+    "Heart failure stay = inpatient encounter whose primary_icd10 starts with I50.",
+    "The year of a stay is the calendar year of its start_date.",
+    "Count stays, not patients.",
+    "Report per hospital and year (2023, 2024, 2025): number of heart failure stays."
+  ]
+}

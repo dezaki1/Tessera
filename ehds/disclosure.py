@@ -50,6 +50,8 @@ class RawMean:
 class RawCell:
     counts: dict[str, int] = field(default_factory=dict)
     means: dict[str, RawMean] = field(default_factory=dict)
+    # For counts of stays: how many distinct patients those stays belong to.
+    patients: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -108,12 +110,18 @@ def round_half_up(value: Decimal) -> float:
     return float(value.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
 
 
-def safe_count(n: int) -> SafeValue:
-    return LESS_THAN if n < SMALL_CELL_THRESHOLD else int(n)
+def safe_count(n: int, n_patients: int | None = None) -> SafeValue:
+    """A count below 10 is "<10". A count of stays is also "<10" when it comes from fewer than
+    10 patients: 11 stays of 5 patients describe those 5 people as precisely as a count of 5."""
+    if n < SMALL_CELL_THRESHOLD or (n_patients is not None and n_patients < SMALL_CELL_THRESHOLD):
+        return LESS_THAN
+    return int(n)
 
 
-def safe_percentage(numerator: int, denominator: int) -> SafeValue:
-    if numerator < SMALL_CELL_THRESHOLD or denominator < SMALL_CELL_THRESHOLD:
+def safe_percentage(numerator: int, denominator: int,
+                    numerator_patients: int | None = None, denominator_patients: int | None = None) -> SafeValue:
+    small = [x for x in (numerator, denominator, numerator_patients, denominator_patients) if x is not None]
+    if min(small) < SMALL_CELL_THRESHOLD:
         return SUPPRESSED
     with localcontext() as ctx:
         ctx.prec = 50
@@ -145,11 +153,12 @@ def disclose(raw: RawResult) -> SafeAnswer:
         values: list[SafeValue] = []
         for m in visible:
             if m.kind == "count":
-                values.append(safe_count(cell.counts.get(m.name, 0)))
+                values.append(safe_count(cell.counts.get(m.name, 0), cell.patients.get(m.name)))
             elif m.kind == "percentage":
                 values.append(
                     safe_percentage(
-                        cell.counts.get(m.numerator, 0), cell.counts.get(m.denominator, 0)
+                        cell.counts.get(m.numerator, 0), cell.counts.get(m.denominator, 0),
+                        cell.patients.get(m.numerator), cell.patients.get(m.denominator),
                     )
                 )
             elif m.kind == "mean":

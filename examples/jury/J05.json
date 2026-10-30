@@ -1,0 +1,19 @@
+{
+  "id": "J05",
+  "submitted": "2026-11-02T10:30:00+01:00",
+  "applicant": {
+    "name": "Dr. Florian Wagner",
+    "organisation": "Ludwig Boltzmann Institute for Cardiovascular Prevention (non-profit research)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We investigate whether blood pressure control in older people with hypertension differs between hospitals and between men and women.",
+  "question": "What is the mean systolic blood pressure of hypertensive patients aged 65 or over, by hospital and sex?",
+  "definitions": [
+    "Hypertension = a diagnosis with ICD-10 code I10.",
+    "Aged 65 or over on 31 December 2025.",
+    "Systolic blood pressure = LOINC 8480-6; only the latest reading of each patient is used, patients without a reading are excluded.",
+    "Report per hospital and sex: number of patients with a reading and their mean systolic blood pressure in mm Hg, one decimal."
+  ]
+}

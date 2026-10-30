@@ -241,6 +241,13 @@ class Engine:
             labels = [b.label for b in d.bands]
             if len(set(labels)) != len(labels):
                 raise SpecError("age band labels must be unique")
+            # Overlapping bands would let the difference of two released counts reveal a hidden
+            # small one (18-91 vs 18-92 gives the number aged 92), so bands must not overlap.
+            ordered = sorted(d.bands, key=lambda b: b.min)
+            for lower, upper in zip(ordered, ordered[1:]):
+                if lower.max is None or upper.min <= lower.max:
+                    raise SpecError(f"age bands {lower.label!r} and {upper.label!r} overlap; "
+                                    "overlapping groups can reveal small counts by subtraction")
             rows = ", ".join(
                 f"({k}, {lit(b.label)}, {int(b.min)}, {'NULL' if b.max is None else int(b.max)})"
                 for k, b in enumerate(d.bands)
@@ -288,6 +295,8 @@ class Engine:
         for k, m in enumerate(metrics):
             if m.kind == "count":
                 aggregates.append(f"count(u.pid) FILTER (WHERE u.f_{k}) AS f_{k}")
+                if unit == "encounter":  # how many patients the counted stays belong to
+                    aggregates.append(f"count(DISTINCT u.pid) FILTER (WHERE u.f_{k}) AS fp_{k}")
             else:
                 has = f"u.f_{k} AND u.v_{k} IS NOT NULL"
                 aggregates += [
@@ -335,6 +344,9 @@ class Engine:
                     if m.kind == "count":
                         cell.counts[m.name] = int(row[pos])
                         pos += 1
+                        if unit == "encounter":
+                            cell.patients[m.name] = int(row[pos])
+                            pos += 1
                     else:
                         total, n, n_patients = row[pos : pos + 3]
                         cell.means[m.name] = RawMean(

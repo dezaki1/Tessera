@@ -52,6 +52,11 @@ def numbers_match(expected: dict, ours) -> list[str]:
     if not isinstance(ours, dict):
         return ["no answer"]
     for group, value in expected.items():
+        if group in ours and isinstance(value, dict) and isinstance(ours[group], dict) \
+                and any(isinstance(v, dict) for v in value.values()):
+            # nested groups (hospital -> year): check each subgroup on its own
+            missing += [f"{group}/{m}" for m in numbers_match(value, ours[group])]
+            continue
         if group in ours:
             pool = leaves(ours[group])
         else:  # e.g. {"cohort_size": 1152}: a value without a group
@@ -106,7 +111,11 @@ def privacy_problems(rid: str, record: dict, engine, opted_out: set[str], workdi
                     m = metrics[name]
                     if m.kind == "count" and cell.counts.get(name, 0) < SMALL_CELL_THRESHOLD and value != LESS_THAN:
                         problems.append(f"{group}.{name}: small count not hidden")
-                    if m.kind == "percentage" and min(cell.counts.get(m.numerator, 0), cell.counts.get(m.denominator, 0)) < SMALL_CELL_THRESHOLD and value != SUPPRESSED:
+                    if m.kind == "count" and cell.patients.get(name, 99) < SMALL_CELL_THRESHOLD and value != LESS_THAN:
+                        problems.append(f"{group}.{name}: stays of fewer than 10 patients not hidden")
+                    behind = [cell.counts.get(m.numerator, 0), cell.counts.get(m.denominator, 0),
+                              cell.patients.get(m.numerator, 99), cell.patients.get(m.denominator, 99)]
+                    if m.kind == "percentage" and min(behind) < SMALL_CELL_THRESHOLD and value != SUPPRESSED:
                         problems.append(f"{group}.{name}: percentage not suppressed")
                     if m.kind == "mean":
                         mean = cell.means.get(name)
@@ -131,28 +140,24 @@ def privacy_problems(rid: str, record: dict, engine, opted_out: set[str], workdi
 # --- main ----------------------------------------------------------------------------------
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--runs", type=int, default=3)
-    ap.add_argument("--requests", default=str(ROOT / "requests"))
-    ap.add_argument("--out", default=str(ROOT / "runs"))
-    args = ap.parse_args()
+SETS = {
+    "official": ("Official sample requests (requests/)", ROOT / "requests"),
+    "jury": ("Independent jury-style requests (examples/jury/)", ROOT / "examples" / "jury"),
+}
 
-    out = Path(args.out)
-    if out.exists():
-        shutil.rmtree(out)
+
+def evaluate(title: str, requests_dir: Path, out: Path, n_runs: int) -> tuple[str, bool]:
     out.mkdir(parents=True)
-
     runs = []
-    for i in range(1, args.runs + 1):
+    for i in range(1, n_runs + 1):
         workdir = out / f"work{i}"
         env = {**os.environ, "PYTHONHASHSEED": str(1000 + i)}
-        subprocess.run([sys.executable, "-m", "evaluation.run_once", "--requests", args.requests,
+        subprocess.run([sys.executable, "-m", "evaluation.run_once", "--requests", str(requests_dir),
                         "--workdir", str(workdir), "--out", str(out / f"run{i}.json")],
                        cwd=ROOT, env=env, check=True)
         runs.append((workdir, json.loads((out / f"run{i}.json").read_text(encoding="utf-8"))))
 
-    expected = json.loads((Path(args.requests) / "expected.json").read_text(encoding="utf-8"))
+    expected = json.loads((requests_dir / "expected.json").read_text(encoding="utf-8"))
     with open(ROOT / "data" / "patients.csv", newline="", encoding="utf-8") as f:
         opted_out = {row["patient_id"] for row in csv.DictReader(f) if row["opted_out"] == "true"}
 
@@ -222,22 +227,47 @@ def main() -> int:
                      f"{len(r['leaks']) or 0}{' ' + '; '.join(r['leaks']) if r['leaks'] else ''} | "
                      f"{'yes' if r['consistent'] else 'NO'} | {r['seconds']:.3f} |")
     report = "\n".join([
-        "## Metrics", "",
+        f"## {title}", "",
         "| Metric | Result | Target |", "|---|---|---|",
-        f"| Correct decisions | {summary['correct_decisions']} | 10 of 10 |",
-        f"| Correct numbers | {summary['correct_numbers']} | 6 of 6 |",
+        f"| Correct decisions | {summary['correct_decisions']} | {with_expected} of {with_expected} |",
+        f"| Correct numbers | {summary['correct_numbers']} | {totals['numbers_of']} of {totals['numbers_of']} |",
         f"| Privacy leaks | {summary['privacy_leaks']} | 0 |",
-        f"| Consistency ({summary['runs']} runs) | {summary['consistency']} | 10 of 10 |",
+        f"| Consistency ({summary['runs']} runs) | {summary['consistency']} | {n} of {n} |",
         f"| Slowest time to answer | {summary['slowest_seconds']} s | under 60 s |",
         "", f"App start-up (data load, once): {summary['startup_seconds']} s. "
             f"Opted-out patients in the working store: {summary['opted_out_patients_in_store']}.",
-        "", "## Per request", "", *lines, ""])
-    (out / "report.md").write_text(report, encoding="utf-8")
+        "", "### Per request", "", *lines, ""])
     (out / "summary.json").write_text(json.dumps({"summary": summary, "rows": rows}, indent=1, ensure_ascii=False), encoding="utf-8")
-    print(report)
     ok = (totals["decisions"] == with_expected and totals["numbers"] == totals["numbers_of"]
           and summary["privacy_leaks"] == 0 and totals["consistent"] == n)
-    return 0 if ok else 1
+    return report, ok
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--runs", type=int, default=3)
+    ap.add_argument("--sets", default="official,jury", help="comma-separated: " + ", ".join(SETS))
+    ap.add_argument("--requests", help="score this folder (with expected.json) instead of the named sets")
+    ap.add_argument("--out", default=str(ROOT / "runs"))
+    args = ap.parse_args()
+
+    out = Path(args.out)
+    if out.exists():
+        shutil.rmtree(out)
+    out.mkdir(parents=True)
+    if args.requests:
+        chosen = [("Requests in " + args.requests, Path(args.requests), "custom")]
+    else:
+        chosen = [(SETS[k][0], SETS[k][1], k) for k in args.sets.split(",")]
+    reports, all_ok = [], True
+    for title, folder, key in chosen:
+        report, ok = evaluate(title, folder, out / key, args.runs)
+        reports.append(report)
+        all_ok &= ok
+    text = "\n".join(reports)
+    (out / "report.md").write_text(text, encoding="utf-8")
+    print(text)
+    return 0 if all_ok else 1
 
 
 if __name__ == "__main__":

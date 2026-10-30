@@ -42,8 +42,8 @@ class ProhibitedRule:
 PROHIBITED = [
     ProhibitedRule(
         "insurance or credit",
-        "Using health data to set insurance premiums or contributions, or to exclude people from "
-        "insurance or credit, is prohibited (Art. 54).",
+        "Using health data to change people's insurance premiums or contributions, or to exclude them from "
+        "insurance or credit or change their loan conditions, is prohibited (Art. 54(b)).",
         patterns=(
             # insurer/insurance near any premium-setting or underwriting signal (extended window)
             r"\b(insurance|insurer'?s?|life[- ]insurance)\b[^.]{0,150}"
@@ -72,7 +72,8 @@ PROHIBITED = [
     ),
     ProhibitedRule(
         "employment decisions",
-        "Using health data for decisions about employees or job applicants is prohibited (Art. 54).",
+        "Using health data for decisions about job offers, employees or job applicants is prohibited "
+        "(Art. 54(a) and (b)).",
         patterns=(
             r"\b(employee list|staff list|our employees|our staff)\b",
             # job applicants / candidates (including "job candidates to shortlist")
@@ -95,7 +96,7 @@ PROHIBITED = [
     ),
     ProhibitedRule(
         "advertising or marketing",
-        "Advertising and marketing are prohibited purposes (Art. 54).",
+        "Using health data for advertising or marketing is prohibited (Art. 54(c)).",
         patterns=(r"\badvertis\w*\b", r"\bmarketing (campaign|activit\w+|strateg\w+|purposes?)\b",
                   # a seller who wants to target people ("we sell supplements and want to target gyms")
                   r"\b(we (?:sell|distribute|market)|our (?:products?|brand|supplements?|shop|store|stores))\b[^.]{0,120}"
@@ -107,8 +108,8 @@ PROHIBITED = [
     ),
     ProhibitedRule(
         "harmful products",
-        "Developing or marketing products that harm health, such as tobacco and nicotine products, "
-        "alcohol, addictive products or weapons, is prohibited (Art. 54).",
+        "Using health data to develop products that may harm people or public health, such as tobacco and "
+        "nicotine products, alcoholic beverages, weapons or addictive products, is prohibited (Art. 54(d)).",
         patterns=(),
         trigger=r"\b(tobacco|nicotine|cigarettes?|e-?cigarettes?|vap(?:e|es|ing)|pouch(?:es)?|snus|alcohol\w*|beer|spirits|"
                 r"liquor|gambling|betting|weapons?|firearms?|illicit drugs?|addictive)\b",
@@ -121,7 +122,7 @@ PROHIBITED = [
     ),
     ProhibitedRule(
         "decisions against individuals",
-        "Taking decisions that are detrimental to the people in the data is prohibited (Art. 54).",
+        "Taking decisions that are detrimental to people based on their health data is prohibited (Art. 54(a)).",
         patterns=(
             # deny/refuse/blacklist a person group (health reason need not be explicit — the
             # action against the group is itself the signal; study-exclusion uses "from the
@@ -145,6 +146,13 @@ REIDENTIFICATION = re.compile(
     r"(?:individual|specific|named) (?:patients|persons|people)\b", I)
 
 SPE_JUSTIFICATION = [
+    # "... which aggregated tables cannot provide", "summary statistics would not capture ..."
+    r"\b(aggregated?|summary|anonymi[sz]ed|statistical)\s+(?:tables?|data|statistics|counts?|figures|numbers)\s+"
+    r"(?:cannot|can ?not|can't|do not|don't|would not|wouldn't|will not|won't)\s+(?:provide|capture|show|answer|"
+    r"support|represent|reflect|give|contain|be used)\b",
+    r"\b(?:not possible|impossible)\s+with\s+(?:aggregated?|summary|anonymi[sz]ed)\s+(?:data|statistics|tables?)\b",
+    r"\beach patient'?s\s+(?:sequence|history|histories|trajectory|timeline|time series|records?)\b",
+    r"\b(?:individual|patient|person)[- ]level\s+(?:sequences?|histories|trajectories|timelines|time series)\b",
     r"\b(aggregates?|aggregated data|statistics|summary data|summary statistics|anonymi[sz]ed (?:data|statistics|counts?))\b"
     r"[^.]{0,40}\b(are|is|would be|will be)\s+(?:not (?:enough|sufficient|adequate)|insufficient)\b",
     r"\b(not enough|insufficient|cannot be answered|can ?not be done)\b[^.]{0,40}\b(aggregates?|statistics|aggregated)\b",
@@ -184,6 +192,7 @@ class Decision:
     trace: list[Finding]
     purposes: list[str]
     staff_flags: list[str]
+    reidentification: bool = False  # the applicant states an intent to re-identify or link people
 
     def to_dict(self) -> dict:
         return {
@@ -192,6 +201,7 @@ class Decision:
             "reason": self.reason,
             "purposes": self.purposes,
             "staff_flags": self.staff_flags,
+            "reidentification": self.reidentification,
             "trace": [f.__dict__ for f in self.trace],
         }
 
@@ -220,8 +230,34 @@ def check_prohibited(text: str) -> list[tuple[ProhibitedRule, list[str]]]:
     return hits
 
 
+# Art. 53(1) point for each purpose; (a)-(c) are reserved for public sector bodies (Art. 53(2)).
+PURPOSE_POINTS = {
+    "public health": "a", "policy-making": "b", "official statistics": "c", "education or teaching": "d",
+    "scientific research": "e", "training and testing algorithms": "e(ii)", "improving care": "f",
+}
+PUBLIC_ONLY = {"public health", "policy-making", "official statistics"}
+PUBLIC_BODY = re.compile(
+    r"\b(ministry|ministerium|government|authority|authorities|agency|statistics office|statistical office|"
+    r"national statistics|public (?:health )?(?:body|institute|agency|authority|administration)|municipal\w*|"
+    r"federal|social (?:security|insurance)|health insurance fund|european commission|ECDC|EMA)\b", I)
+
+
 def allowed_purposes(text: str) -> list[str]:
     return [name for name, pattern in ALLOWED_PURPOSES if re.search(pattern, text, I)]
+
+
+def _cite(purposes: list[str]) -> str:
+    return _join([f"{p} (point {PURPOSE_POINTS[p]})" for p in purposes])
+
+
+def _quote(rule_hits: list[str], text: str) -> str:
+    """The applicant's own sentence that triggered a prohibition, to show them why."""
+    for hit in rule_hits:
+        anchor = hit.split(" … ")[0].split(": ", 1)[-1]
+        for sentence in re.split(r"(?<=[.!?])\s+", text):
+            if anchor.lower() in sentence.lower():
+                return sentence.strip()
+    return ""
 
 
 def spe_justification(text: str) -> list[str]:
@@ -243,6 +279,15 @@ def _join(items: list[str]) -> str:
 
 
 def decide(request: dict) -> Decision:
+    decision = _decide(request)
+    text = f"{request.get('purpose', '')} {request.get('question', '')}"
+    # Chapter IV prohibits re-identifying the people in the data (recital 54); the pipeline will not
+    # grant a secure processing environment to an application that announces it.
+    decision.reidentification = bool(_snippets(REIDENTIFICATION.pattern, text))
+    return decision
+
+
+def _decide(request: dict) -> Decision:
     purpose = str(request.get("purpose", ""))
     question = str(request.get("question", ""))
     organisation = str((request.get("applicant") or {}).get("organisation", ""))
@@ -261,6 +306,11 @@ def decide(request: dict) -> Decision:
         trace.append(Finding("1. Prohibited purpose (Art. 54)", "matched",
                              [f"{rule.category}: {m}" for rule, ms in hits for m in ms]))
         reason = " ".join(dict.fromkeys(rule.explanation for rule, _ in hits))
+        quoted = _quote([m for _, ms in hits for m in ms], text)
+        if quoted:
+            reason += f' Your application says: "{quoted}"'
+        reason += (" If this is not what you intend, you can submit a new application with the purpose "
+                   "described more precisely.")
         if reident:
             reason += " Matching the records with the applicant's own lists would also re-identify people."
         return Decision("REJECT", ["54"], reason, trace, purposes, flags)
@@ -270,10 +320,22 @@ def decide(request: dict) -> Decision:
     if weak:
         flags.append(f"Possible prohibited-purpose wording ({', '.join(weak)}) did not meet a rule; please check.")
 
-    purpose_text = _join(purposes) if purposes else "the stated purpose"
-    if not purposes:
-        flags.append("No Art. 53 purpose was recognised in the purpose text; please confirm it is an allowed purpose.")
-    allowed = f"{purpose_text[0].upper()}{purpose_text[1:]} {'is an' if len(purposes) <= 1 else 'are'} allowed purpose{'s' if len(purposes) > 1 else ''} (Art. 53)."
+    public_body = bool(PUBLIC_BODY.search(organisation))
+    citable = purposes if public_body else [p for p in purposes if p not in PUBLIC_ONLY]
+    if purposes and not citable:
+        flags.append(f"Art. 53(2): the purpose ({_join(purposes)}) is reserved for public sector bodies, and "
+                     f"'{organisation or 'the applicant'}' does not look like one. Please check before release.")
+    elif len(citable) < len(purposes):
+        dropped = [p for p in purposes if p not in citable]
+        flags.append(f"Art. 53(2): {_join(dropped)} {'is' if len(dropped) == 1 else 'are'} reserved for public "
+                     "sector bodies; only the other purposes were cited.")
+    if citable:
+        allowed = f"The purpose falls under Art. 53(1): {_cite(citable)}."
+    else:
+        if not purposes:
+            flags.append("No Art. 53 purpose was recognised in the purpose text; please confirm it is an allowed purpose.")
+        allowed = ("We could not match the stated purpose to a purpose listed in Art. 53(1); a staff member "
+                   "will review it.")
 
     # 2. Health data request -> statistics
     kind = request_type(request)

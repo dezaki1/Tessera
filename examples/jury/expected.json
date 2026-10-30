@@ -1,0 +1,222 @@
+{
+  "J01": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Klinikum Nord": {
+        "stays": 84,
+        "mean_los": 7.7
+      },
+      "Klinikum Süd": {
+        "stays": 69,
+        "mean_los": 6.9
+      },
+      "Klinikum West": {
+        "stays": 67,
+        "mean_los": 6.8
+      }
+    }
+  },
+  "J02": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "0-17": {
+        "patients": 75
+      },
+      "18-44": {
+        "patients": 94
+      },
+      "45-64": {
+        "patients": 46
+      },
+      "65-79": {
+        "patients": 14
+      },
+      "80 and older": {
+        "patients": "<10"
+      }
+    }
+  },
+  "J03": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Klinikum Nord": {
+        "2023": {
+          "stays": 56
+        },
+        "2024": {
+          "stays": 36
+        },
+        "2025": {
+          "stays": 66
+        }
+      },
+      "Klinikum Süd": {
+        "2023": {
+          "stays": 58
+        },
+        "2024": {
+          "stays": 47
+        },
+        "2025": {
+          "stays": 60
+        }
+      },
+      "Klinikum West": {
+        "2023": {
+          "stays": 34
+        },
+        "2024": {
+          "stays": 31
+        },
+        "2025": {
+          "stays": 31
+        }
+      }
+    }
+  },
+  "J04": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Klinikum Nord": {
+        "adults_t2d_with_hba1c": 466,
+        "poorly_controlled": 97,
+        "pct": 20.8
+      },
+      "Klinikum Süd": {
+        "adults_t2d_with_hba1c": 405,
+        "poorly_controlled": 100,
+        "pct": 24.7
+      },
+      "Klinikum West": {
+        "adults_t2d_with_hba1c": 281,
+        "poorly_controlled": 54,
+        "pct": 19.2
+      }
+    }
+  },
+  "J05": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Klinikum Nord": {
+        "female": {
+          "patients": 202,
+          "mean_sbp": 145.0
+        },
+        "male": {
+          "patients": 180,
+          "mean_sbp": 143.9
+        }
+      },
+      "Klinikum Süd": {
+        "female": {
+          "patients": 165,
+          "mean_sbp": 145.7
+        },
+        "male": {
+          "patients": 187,
+          "mean_sbp": 145.9
+        }
+      },
+      "Klinikum West": {
+        "female": {
+          "patients": 143,
+          "mean_sbp": 146.1
+        },
+        "male": {
+          "patients": 134,
+          "mean_sbp": 145.7
+        }
+      }
+    }
+  },
+  "J06": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "female": {
+        "persons_65plus": 1822,
+        "with_uti_admission": "<10",
+        "share_pct": "suppressed"
+      },
+      "male": {
+        "persons_65plus": 1752,
+        "with_uti_admission": 11,
+        "share_pct": 0.6
+      }
+    }
+  },
+  "J07": {
+    "decision": "APPROVE_SPE",
+    "articles": [
+      "53",
+      "66",
+      "68",
+      "73"
+    ],
+    "answer": {
+      "cohort_size": 10
+    }
+  },
+  "J08": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Klinikum Nord": {
+        "female": {
+          "stays": "<10",
+          "patients": "<10"
+        },
+        "male": {
+          "stays": "<10",
+          "patients": "<10"
+        }
+      },
+      "Klinikum Süd": {
+        "female": {
+          "stays": "<10",
+          "patients": "<10"
+        },
+        "male": {
+          "stays": "<10",
+          "patients": "<10"
+        }
+      },
+      "Klinikum West": {
+        "female": {
+          "stays": "<10",
+          "patients": "<10"
+        },
+        "male": {
+          "stays": "<10",
+          "patients": "<10"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "J07",
+  "submitted": "2026-11-02T11:20:00+01:00",
+  "applicant": {
+    "name": "Dr. Jonas Leitner",
+    "organisation": "Institute of Biomedical Informatics, Technical University (academic research)",
+    "country": "AT"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "We develop and validate a machine-learning model that predicts complications after hip fracture surgery in older patients. The model learns from each patient's sequence of diagnoses and hospital visits, which aggregated tables cannot provide.",
+  "question": "Provide pseudonymised encounters and conditions of patients aged 65 or over who had an inpatient stay with a hip fracture as main diagnosis. Only model parameters and validation metrics will leave the secure environment.",
+  "definitions": [
+    "Aged 65 or over on 31 December 2025.",
+    "Hip fracture stay = inpatient encounter with primary_icd10 starting with S72.",
+    "Cohort = patients aged 65 or over with at least one hip fracture stay.",
+    "Report the number of patients in the cohort."
+  ]
+}

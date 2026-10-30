@@ -140,7 +140,7 @@ def name_pattern(name: str) -> re.Pattern:
     last = words[-1]
     lower = last.lower()
     if lower in _IRREGULAR_PLURALS:
-        tail = f"(?:{re.escape(last)}|{re.escape(_IRREGULAR_PLURALS[lower])})"
+        tail = f"(?:{re.escape(last)}s?|{re.escape(_IRREGULAR_PLURALS[lower])})"  # person, persons, people
     elif lower in _IRREGULAR_PLURALS.values():
         tail = re.escape(last)
     elif re.search(r"(s|x|z|ch|sh)$", lower):

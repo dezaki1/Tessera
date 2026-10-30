@@ -1,0 +1,20 @@
+{
+  "id": "J04",
+  "submitted": "2026-11-02T10:05:00+01:00",
+  "applicant": {
+    "name": "Dr. Verena Huber",
+    "organisation": "Austrian Society for Diabetes Quality Assurance",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Benchmarking of glycaemic control between hospitals as part of a national quality improvement initiative.",
+  "question": "Among adults with type 2 diabetes, what proportion at each hospital has poorly controlled blood sugar?",
+  "definitions": [
+    "Adult = 18 years or older on 31 December 2025.",
+    "Type 2 diabetes = a condition with ICD-10 code E11 (any subcode).",
+    "Take each patient's most recent HbA1c (LOINC 4548-4); patients with no HbA1c are not counted.",
+    "Poorly controlled = latest HbA1c above 8.0 %.",
+    "Report per data holder: adults with type 2 diabetes and an HbA1c value, how many of them are poorly controlled, and the percentage poorly controlled, one decimal."
+  ]
+}

@@ -67,11 +67,20 @@ class AccessBody:
             },
         }
         notes = result["notes"]
-        notes.append("Patients who opted out of secondary use (Art. 71) are excluded from every number.")
+        if decision.decision != "REJECT":
+            notes.append("Patients who opted out of secondary use are excluded from every number (Art. 71).")
 
         if decision.decision == "REJECT":
             result["status"] = "rejected"
             notes.append("No data was queried for this request.")
+        elif decision.decision == "APPROVE_SPE" and decision.reidentification:
+            result["status"] = "needs_review"
+            result["staff"]["flags"].append("No SPE was set up: the application states an intent to re-identify "
+                                            "or link the people in the data, which Chapter IV prohibits.")
+            notes.append("Your application says the data would be linked to your own records or used to "
+                         "re-identify people. Re-identification is prohibited under Chapter IV of Regulation "
+                         "(EU) 2025/327, so no secure processing environment was set up. A staff member will "
+                         "contact you.")
         elif decision.decision == "APPROVE_SPE":
             self._spe(request_id, parsed, result)
         else:
@@ -118,11 +127,41 @@ class AccessBody:
             notes.append("Some sentences of the request could not be used; staff have been notified: "
                          + "; ".join(parsed.unresolved))
 
+    def _cohort_mismatch(self, parsed: ParsedRequest) -> str | None:
+        """Cross-check: the SPE cohort must have the size the request's own numbers describe.
+
+        The cohort and the requested count are parsed separately; if they disagree, one of them
+        is wrong, and copying patient-level data on a guess is not acceptable.
+        """
+        stats = parsed.statistics
+        if stats is None or stats.dimensions:
+            return None
+        counts = [m for m in stats.metrics if m.kind == "count" and m.visible and m.unit == "patient"]
+        if len(counts) != 1:
+            return None
+        try:
+            raw, _ = self.engine.run(stats.model_copy(update={"metrics": counts}))
+            requested = raw.cells[()].counts[counts[0].name]
+            cohort = len(self.store.cursor().execute(self.engine.cohort_sql(parsed.cohort)).fetchall())
+        except SpecError:
+            return None
+        if requested != cohort:
+            return (f"SPE cohort check failed: the cohort definition selects {cohort} patients but the requested "
+                    f"count ('{counts[0].label}') is {requested}. No data was copied.")
+        return None
+
     def _spe(self, request_id: str, parsed: ParsedRequest, result: dict) -> None:
         if parsed.cohort is None:
             result["status"] = "needs_review"
             result["notes"].append("The cohort or record types could not be determined automatically. "
                                    "A staff member will set up the secure processing environment.")
+            return
+        mismatch = self._cohort_mismatch(parsed)
+        if mismatch:
+            result["status"] = "needs_review"
+            result["staff"]["flags"].append(mismatch)
+            result["notes"].append("The patients to include could not be determined unambiguously. A staff member "
+                                   "will check the cohort before the secure processing environment is set up.")
             return
         manifest = self.spe.build(request_id, parsed.cohort)
         result["status"] = "spe_ready"

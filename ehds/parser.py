@@ -290,8 +290,8 @@ class _Context:
             r.unresolved.append("A reference date other than 31 December 2025 is mentioned; only 31 December 2025 is supported.")
         everything = " ".join([self.question, *self.definitions])
         if re.search(r"\b(?:includ\w*|with|also|even)\b[^.]{0,40}\bopt(?:ed)?[- ]?outs?\b", everything, I):
-            r.unresolved.append("The request asks to include patients who opted out. They are always excluded "
-                                "(Art. 71); the numbers leave them out.")
+            r.unresolved.append("The request asks to include patients who opted out. They are excluded under "
+                                "Art. 71; the numbers leave them out.")
         r.concepts = {c.name: f"{c.kind}: {c.definition}" for c in self.concepts}
         try:
             r.statistics = self._statistics()
@@ -443,6 +443,14 @@ class _Context:
         type_m = re.search(r"\btype\s*(?:=|is|of)?\s*['\"‘’]?(inpatient|outpatient|emergency)['\"‘’]?", body, I)
         sex_m = re.search(r"\bsex\s*(?:=|is)?\s*['\"‘’]?(female|male)['\"‘’]?", body, I)
 
+        # "patients ... with at least one hip fracture stay" defines patients, not stays: the stay
+        # becomes a has-had-such-a-stay criterion instead of the thing being counted.
+        patient_group = re.match(rf"^\s*(?:all\s+|the\s+)?(?:{PATIENT_HEADS}|persons?|people)\b", body, I) or any(
+            a.kind in ("attribute", "composite") and a.start == 0 for a in atoms)
+        if patient_group and ("visit" in kinds or "primary" in kinds):
+            meaning = self._meaning(body, role="qualifier")
+            return Concept(name, sentence, "composite", criteria=meaning.criteria,
+                           keys=frozenset(meaning.keys | {f"concept:{name.lower()}"}))
         if "visit" in kinds or type_m or re.search(r"\b(encounters?|visits?)\b", body, I) and "primary" in kinds:
             meaning = self._meaning(body, role="count", force_head_visit=True)
             visit = meaning.visit_head or EncounterFilter()
@@ -466,7 +474,7 @@ class _Context:
             if a.kind == "medication":
                 med = MedicationCriterion(atc_prefixes=codes)
                 return Concept(name, sentence, "medication", med=med, keys=frozenset({f"medication:{','.join(codes)}"}))
-            if a.kind == "measurement":
+            if a.kind == "measurement" and self._threshold(body[a.end:]) == (None, None):
                 return Concept(name, sentence, "measurement", loinc=a.loinc, keys=frozenset({f"measurement:{a.loinc}"}))
         if not atoms:
             # Bare codes without a keyword: "any condition coded E11".
@@ -480,7 +488,7 @@ class _Context:
             raise _Unresolved(f"definition of {name!r} not understood")
         if len(atoms) == 1 and atoms[0].kind == "medication":
             return Concept(name, sentence, "medication", med=atoms[0].med, keys=frozenset({atoms[0].key}))
-        if len(atoms) == 1 and atoms[0].kind == "measurement":
+        if len(atoms) == 1 and atoms[0].kind == "measurement" and self._threshold(body[atoms[0].end:]) == (None, None):
             return Concept(name, sentence, "measurement", loinc=atoms[0].loinc, keys=frozenset({atoms[0].key}))
         meaning = self._meaning(body, role="count")
         if meaning.ratio:
@@ -899,7 +907,7 @@ class _Context:
 
     def _metric_phrases(self, body: str) -> list[str]:
         body = _clean_phrase(body)
-        starters = (r"(?:the|a|an|mean|average|median|%|percent|percentage|share|proportion|number|count|how many|"
+        starters = (r"(?:the|mean|average|median|%|percent|percentage|share|proportion|number|count|how many|"
                     r"their|that|this|those|of them|total|" + PATIENT_HEADS + r"|stays?|visits?|encounters?|admissions?)\b|%")
         concept_heads = [c.name for c in self.concepts if c.kind in ("attribute", "composite", "ratio", "visit")]
         starter_re = re.compile(r"^\s*(?:" + starters + "".join(
@@ -1042,7 +1050,8 @@ class _Context:
 
         # Restrictions stated in the question (or definitions) but not in the Report line.
         covered = set().union(*(m.keys for m in meanings)) if meanings else set()
-        restrictions = self._question_restrictions(covered, self._codes_used(metrics + hidden))
+        restrictions = self._question_restrictions(covered, self._codes_used(metrics + hidden),
+                                                   {d.kind for d in dims})
         for loinc in self.required_measurements:
             restrictions.append(ObservationCriterion(loinc=loinc))
         all_metrics = []
@@ -1066,7 +1075,7 @@ class _Context:
                     codes |= set(f.primary_icd10_prefixes)
         return codes
 
-    def _question_restrictions(self, covered: set[str], codes_used: set[str]) -> list:
+    def _question_restrictions(self, covered: set[str], codes_used: set[str], grouped: set[str] = frozenset()) -> list:
         """Qualifiers that appear only in the question.
 
         Applied automatically: age, sex, region and hospital, and concepts the request defines
@@ -1094,6 +1103,10 @@ class _Context:
                     f"'{a.text}' in the question is not part of the Report line or the definitions, so it was "
                     "not applied. Staff should check whether the numbers should be restricted to it.")
                 continue
+            # "women and men ... by sex": the grouping already separates them; filtering would empty it.
+            dimension_of = {"sex": "sex", "region": "region", "data_holder": "data_holder"}
+            if any(dimension_of.get(c.kind) in grouped for c in a.criteria):
+                continue
             neg = bool(NEGATION_RE.search(window))
             if a.kind == "medication":
                 crits = [a.med.model_copy(update={"active": bool(ACTIVE_RE.search(window)) or self._default_active(a.text),
@@ -1103,7 +1116,17 @@ class _Context:
             restrictions += crits
             self.result.assumptions.append(
                 f"'{a.text}' from the question is applied to every number (the Report line does not repeat it).")
-        return restrictions
+        # Several values of one attribute ("women and men", "Wien and Tirol") mean either of them.
+        merged, by_kind = [], {}
+        for c in restrictions:
+            if c.kind in ("sex", "region", "data_holder") and not c.negate:
+                if c.kind in by_kind:
+                    first = merged[by_kind[c.kind]]
+                    merged[by_kind[c.kind]] = first.model_copy(update={"values": list(dict.fromkeys(first.values + c.values))})
+                    continue
+                by_kind[c.kind] = len(merged)
+            merged.append(c)
+        return merged
 
     # ---------------------------------------------------------------- cohort
     def _cohort(self) -> CohortSpec:

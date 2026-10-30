@@ -1,0 +1,18 @@
+{
+  "id": "J08",
+  "submitted": "2026-11-02T11:45:00+01:00",
+  "applicant": {
+    "name": "Dr. Hannah Brandl",
+    "organisation": "Austrian Stroke Unit Registry",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Monitoring of stroke admissions at hospitals that are not part of the stroke unit network, for the annual registry report.",
+  "question": "How many stroke admissions were there in 2025 at each hospital, split by sex, and how many different patients did they concern?",
+  "definitions": [
+    "Stroke admission = inpatient encounter with main diagnosis (primary_icd10) beginning with I63.",
+    "Only admissions with a start_date in 2025.",
+    "Report per hospital and sex: stroke admissions and distinct patients with a stroke admission."
+  ]
+}

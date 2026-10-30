@@ -1,0 +1,19 @@
+{
+  "id": "J02",
+  "submitted": "2026-11-02T09:25:00+01:00",
+  "applicant": {
+    "name": "Prof. Dr. Ivan Kovač",
+    "organisation": "Medical University, Department of Infectious Diseases and Vaccinology",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We want to estimate how many hospitalisations a broader pneumococcal vaccination programme could prevent in each age group.",
+  "question": "How many people were admitted to hospital with pneumonia as the main diagnosis, by age group?",
+  "definitions": [
+    "Pneumonia admission = inpatient encounter with a main diagnosis (primary_icd10) starting with J18.",
+    "Count each person once, even if they were admitted several times.",
+    "Age groups on 31 December 2025: 0-17, 18-44, 45-64, 65-79, 80 and older.",
+    "Report per age group: persons with at least one pneumonia admission."
+  ]
+}

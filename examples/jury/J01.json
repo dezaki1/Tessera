@@ -1,0 +1,19 @@
+{
+  "id": "J01",
+  "submitted": "2026-11-02T09:10:00+01:00",
+  "applicant": {
+    "name": "Dr. Katharina Moser",
+    "organisation": "Austrian Trauma Registry, orthogeriatrics working group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We compare orthogeriatric care pathways between hospitals to find out where hip fracture patients stay longest and why, so that discharge planning can be improved.",
+  "question": "For hip fracture admissions, how many stays did each hospital have from 2023 to 2025 and how long did they last on average?",
+  "definitions": [
+    "Hip fracture admission = an inpatient encounter whose primary_icd10 begins with S72.",
+    "Length of stay = end_date minus start_date, in days.",
+    "Count admissions, not people. All years in the data (2023-2025) count.",
+    "Report per hospital (data_holder): hip fracture admissions and their mean length of stay in days, one decimal."
+  ]
+}
