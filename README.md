@@ -152,6 +152,45 @@ patient. Opted-out patients are excluded from every number, denominator and SPE 
 - **No output checking in the SPE.** The SPE blocks every download. A real one would also have an output
   checking step for releasing results such as model weights.
 
+## Purpose check
+
+`ehds/decision.py` applies deterministic regex rules in a fixed order. The same input always produces the
+same output; no LLM is involved.
+
+**Art. 54 categories covered:**
+
+| # | Category | How it is detected |
+|---|---|---|
+| 1 | Insurance premiums / contributions | `insurer/insurance/life-insurance` near premium-setting words; standalone `underwriting`, `actuarial`, `policyholders`, `claimants` near pricing; `premium tiers/levels/adjust`; `price` near `insurance` |
+| 2 | Employment decisions | `job applicants/candidates`; `candidates to shortlist`; contract renewal, hiring, dismissal, termination (verb and noun); `workers/employees/staff` near `dismiss/retain`; `redundancy` near `select/decision` |
+| 3 | Advertising / marketing | Direct `advertis*`; `marketing campaign/strategy`; `sales/promotional campaign`; trigger (`marketing`, `campaign`, `brand`) + context (`product`, `launch`, `physicians`, `consumers`) in the same sentence |
+| 4 | Harmful products (tobacco, alcohol, illicit drugs, gambling, weapons) | Substance/product trigger + commercial context (`develop`, `launch`, `product`, `app`, `platform`, `brand`, `design`) in the same sentence |
+| 5 | Detrimental decisions against individuals | `deny/refuse/blacklist` near a person group; `exclude … from our/their coverage/services/products/programme`; `decide … to exclude/blacklist/deny` |
+
+**Exceptions that prevent a false positive (fire before pattern-matching):**
+
+- Insurance/credit: `marketing authorisation`, `health promotion`, `cessation`, `quit`, `harms of`, `addiction treatment`, `tobacco control`, `public health`, `epidemiolog*`.
+- Employment: `occupational health/disease/safety`.
+- Decisions against individuals: `from the analysis/study/cohort/sample`, `excluded due to missing/age/criteria`.
+
+**Test coverage:** `tests/test_purpose_robustness.py` holds **43 prohibited** and **57 allowed** purpose texts
+(100 cases total) covering all five Art. 54 categories with varied wording, indirect phrasing, and some
+non-native English. Hard cases include innocent-sounding prohibited purposes ("optimise our underwriting
+model", "redundancy selections", "job candidates to shortlist", "premium tiers") and alarming-sounding
+legitimate ones ("insurance fund cost study", "smoking cessation app", "marketing authorisation",
+"occupational health study of employees").
+
+**Known blind spots:**
+
+- Purposes phrased entirely around financial concepts without insurance/credit vocabulary (e.g. "we want to
+  assess the fiscal risk of our portfolio using diagnosis codes") may slip past the insurance rule.
+- Novel product categories not in the substance list (e.g. a new psychoactive substance by brand name) are
+  not caught unless the commercial context words appear.
+- Very indirect employment decisions ("help HR understand attendance patterns") are only flagged for staff,
+  not rejected outright.
+- Art. 54(5) (activities conflicting with national ethical provisions) is not checked by rule; such requests
+  would need staff review.
+
 ## Data
 
 `data/` and `requests/` are copied unchanged from

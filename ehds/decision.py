@@ -44,16 +44,47 @@ PROHIBITED = [
         "insurance or credit",
         "Using health data to set insurance premiums or contributions, or to exclude people from "
         "insurance or credit, is prohibited (Art. 54).",
-        patterns=(r"\b(insurance|insurer'?s?)\b[^.]{0,80}\b(premiums?|pricing|underwrit\w*|tariffs?|risk[- ]based|actual risk)\b",
-                  r"\b(premiums?|underwrit\w*)\b[^.]{0,60}\b(insurance|insured|customers?|policy ?holders?)\b",
-                  r"\b(credit ?(score|scoring|worthiness)|loan (approval|conditions|decisions?)|creditworthiness)\b"),
+        patterns=(
+            # insurer/insurance near any premium-setting or underwriting signal (extended window)
+            r"\b(insurance|insurer'?s?|life[- ]insurance)\b[^.]{0,150}"
+            r"\b(premiums?|pricing|underwrit\w*|tariffs?|risk[- ]based|actual risk|policy pricing|"
+            r"premium tiers?|premium levels?|contributions?)\b",
+            # price/pricing near insurance/life-insurance in either order within a sentence
+            r"\bpric\w+\b[^.]{0,80}\b(insurance|life[- ]insurance|insurer)\b",
+            # underwriting / actuarial / policyholders near pricing decisions
+            r"\b(underwrit\w*|actuarial|policyholders?|claimants?)\b[^.]{0,100}"
+            r"\b(model|tables?|premiums?|pricing|tiers?|pay\b|adjust|price)\b",
+            # standalone premium tiers / policy pricing signals
+            r"\bpremium (tiers?|levels?|adjust\w*|pricing)\b",
+            r"\bpolicy pricing\b",
+            # exclude … from (our) insurance / coverage / products
+            r"\bexclud\w+\b[^.]{0,60}\bfrom\b[^.]{0,40}\b((?:our |their |the )?(?:insurance|coverage|benefits?|products?))\b",
+            # credit, loan and financial eligibility signals
+            r"\b(credit ?(score|scoring|worthiness)|creditworthiness)\b",
+            r"\bloan\b[^.]{0,30}\b(approval|conditions?|decisions?|terms?|rates?|eligibility)\b",
+            r"\breview (?:their |the )?loan\b",
+            # "price accordingly" in the context of patients / claimants / diagnoses
+            r"\bprice accordingly\b",
+        ),
     ),
     ProhibitedRule(
         "employment decisions",
         "Using health data for decisions about employees or job applicants is prohibited (Art. 54).",
-        patterns=(r"\b(employee list|staff list|our employees|our staff|job applicants?|candidates for (?:a )?jobs?)\b",
-                  r"\b(renew(?:ing|al of)? (?:their |the |employment )?contracts?|contract renewals?|hiring decisions?|"
-                  r"before (?:we )?(?:hire|promote|dismiss)|dismiss(?:al)?s? of|terminate (?:their )?employment)\b"),
+        patterns=(
+            r"\b(employee list|staff list|our employees|our staff)\b",
+            # job applicants / candidates (including "job candidates to shortlist")
+            r"\b(job applicants?|job candidates?|candidates? (?:for (?:a )?jobs?|to shortlist))\b",
+            # contract, hiring, dismissal verbs
+            r"\b(renew(?:ing|al of)? (?:their |the |employment )?contracts?|contract renewals?|hiring decisions?|"
+            r"before (?:we )?(?:hire|promote|dismiss)|dismiss(?:al)?s? of)\b",
+            # "terminate/termination of employment" (verb and noun)
+            r"\bterminat\w+ (?:of )?(?:their |the )?employment\b",
+            # dismiss / retain workers/employees/staff in a decision context (either order)
+            r"\b(dismiss\w*|retain\w*)\b[^.]{0,60}\b(workers?|employees?|staff)\b",
+            r"\b(workers?|employees?|staff)\b[^.]{0,60}\b(dismiss\w*|retain\w*)\b",
+            # redundancy selections / decisions about the workforce
+            r"\bredundan\w+\b[^.]{0,60}\b(select\w*|decisions?|list\b|shortlist\w*)\b",
+        ),
         exceptions=r"\boccupational (health|disease|safety)\b",
     ),
     ProhibitedRule(
@@ -72,16 +103,30 @@ PROHIBITED = [
         patterns=(),
         trigger=r"\b(tobacco|nicotine|cigarettes?|e-?cigarettes?|vap(?:e|es|ing)|pouch(?:es)?|snus|alcohol\w*|beer|spirits|"
                 r"liquor|gambling|betting|weapons?|firearms?|illicit drugs?|addictive)\b",
-        context=r"\b(develop\w*|flavours?|flavors?|launch\w*|position\w*|products?|sell\w*|brand\w*|market\w*|"
-                r"consumers?|healthier alternative|customers?)\b",
-        exceptions=r"\b(cessation|quit\w*|stop smoking|nicotine replacement|harms? of|prevent\w* (?:smoking|use)|"
-                   r"addiction treatment)\b",
+        context=r"\b(develop\w*|flavours?|flavors?|launch\w*|position\w*|products?|apps?|platform\w*|sell\w*|brand\w*|"
+                r"market\w*|consumers?|healthier alternative|customers?|engaging|design\w*)\b",
+        exceptions=r"\b(cessation|quit\w*|stop smoking|nicotine replacement|harms? of|harm\w* (?:caused|done)|"
+                   r"prevent\w* (?:smoking|use)|addiction treatment|treatment guidelines?|"
+                   r"tobacco control|control polic\w+|inform\w* (?:policy|prevention|guidelines?)|"
+                   r"epidemiolog\w+|prevalence|public health|health polic\w+)\b",
     ),
     ProhibitedRule(
         "decisions against individuals",
         "Taking decisions that are detrimental to the people in the data is prohibited (Art. 54).",
-        patterns=(r"\b(deny|refuse|exclude|blacklist)\w*\b[^.]{0,40}\b(patients?|people|persons|customers?|applicants?|"
-                  r"individuals?)\b[^.]{0,40}\b(based on|because of|with)\b",),
+        patterns=(
+            # deny/refuse/blacklist a person group (health reason need not be explicit — the
+            # action against the group is itself the signal; study-exclusion uses "from the
+            # analysis / from the study / from the cohort", not "from our services/coverage")
+            r"\b(deny|refuse|blacklist)\w*\b[^.]{0,60}"
+            r"\b(patients?|people|persons|customers?|applicants?|individuals?)\b",
+            # exclude … from our/their coverage/services/products/programme/benefits
+            r"\bexclud\w+\b[^.]{0,60}\bfrom\b[^.]{0,40}"
+            r"\b(?:our |their |the )(?:programme|services?|coverage|benefits?|products?|plan)\b",
+            # "decide which … to exclude/blacklist/deny"
+            r"\bdecide\b[^.]{0,60}\b(exclude|blacklist|deny|refuse)\b",
+        ),
+        exceptions=r"\b(from the (?:analysis|study|cohort|sample|dataset|model)|"
+                   r"excluded (?:from |due to |because of )?(?:missing|incomplete|invalid|age|criteria|the analysis))\b",
     ),
 ]
 
