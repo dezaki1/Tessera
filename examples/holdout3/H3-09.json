@@ -1,0 +1,21 @@
+{
+  "id": "H3-09",
+  "submitted": "2026-10-30T12:40:00+01:00",
+  "applicant": {
+    "name": "Dr. Stefan Wallner",
+    "organisation": "Austrian Nephrology Quality Registry (non-profit association)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Benchmarking of chronic kidney disease care between hospitals for our annual quality report: kidney function of the CKD population and uptake of SGLT2 inhibitors, which guidelines now recommend for kidney protection.",
+  "question": "Per hospital, how many patients have chronic kidney disease, what is their mean eGFR, what share has an eGFR below 45 and what share is on an SGLT2 inhibitor?",
+  "definitions": [
+    "Hospital = the data_holder of the patient record (Klinikum Nord, Klinikum Süd, Klinikum West).",
+    "Chronic kidney disease = any condition with an ICD-10 code starting with N18.",
+    "Use the latest eGFR (LOINC 62238-1) per patient; the mean and the eGFR share are computed over patients with an eGFR value.",
+    "eGFR below 45 = latest eGFR value strictly below 45.",
+    "SGLT2 inhibitor = ATC code starting with A10BK, active on 31 December 2025 (start_date on or before that day and end_date empty or on or after that day); share computed over all patients with chronic kidney disease.",
+    "Report per hospital: patients with chronic kidney disease, patients with an eGFR value, mean eGFR (one decimal), % with eGFR below 45 (one decimal) and % on an active SGLT2 inhibitor (one decimal)."
+  ]
+}

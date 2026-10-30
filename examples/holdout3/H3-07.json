@@ -1,0 +1,20 @@
+{
+  "id": "H3-07",
+  "submitted": "2026-10-30T11:50:00+01:00",
+  "applicant": {
+    "name": "Dr. Johanna Kofler",
+    "organisation": "Fachhochschule Krems, Department of Health Sciences (respiratory care programme)",
+    "country": "AT"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "For our respiratory nursing curriculum we want to describe how inhaled maintenance therapy for asthma is used in children, working-age adults and older people, and compare it with the stepwise treatment guideline.",
+  "question": "Please provide pseudonymised records of all patients with asthma together with their prescriptions.",
+  "definitions": [
+    "Asthma = any condition with an ICD-10 code starting with J45.",
+    "ICS/LABA combination = ATC code starting with R03AK; long-acting muscarinic antagonist (LAMA) = ATC code starting with R03BB.",
+    "A medication is active on 31 December 2025 if start_date is on or before that day and end_date is empty or on or after that day.",
+    "Age bands on 31 December 2025: 0-17, 18-64, 65+.",
+    "Report per band: patients with asthma, % with an active ICS/LABA combination and % with an active LAMA, one decimal."
+  ]
+}

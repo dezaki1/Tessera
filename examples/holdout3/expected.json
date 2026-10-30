@@ -1,0 +1,265 @@
+{
+  "H3-01": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ],
+    "reason": "Tuning gambling mechanics to keep vulnerable people playing longer develops an addictive product and is detrimental to people (Art. 54).",
+    "answer": null
+  },
+  "H3-02": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ],
+    "reason": "Using health data to decline or reprice loans is prohibited (Art. 54).",
+    "answer": null
+  },
+  "H3-03": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ],
+    "reason": "Using health data to screen job candidates is prohibited (Art. 54).",
+    "answer": null
+  },
+  "H3-04": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "reason": "Drug safety (pharmacovigilance) is an allowed purpose (Art. 53). Statistics answer the question (Art. 69). Small cells are suppressed.",
+    "answer": {
+      "18-49": {
+        "patients_on_sglt2": 29,
+        "with_ckd": "<10",
+        "ckd_pct": "suppressed",
+        "patients_with_egfr": "<10",
+        "mean_egfr": "suppressed"
+      },
+      "50-64": {
+        "patients_on_sglt2": 86,
+        "with_ckd": "<10",
+        "ckd_pct": "suppressed",
+        "patients_with_egfr": "<10",
+        "mean_egfr": "suppressed"
+      },
+      "65-74": {
+        "patients_on_sglt2": 90,
+        "with_ckd": "<10",
+        "ckd_pct": "suppressed",
+        "patients_with_egfr": "<10",
+        "mean_egfr": "suppressed"
+      },
+      "75+": {
+        "patients_on_sglt2": 99,
+        "with_ckd": 15,
+        "ckd_pct": 15.2,
+        "patients_with_egfr": 15,
+        "mean_egfr": 43.0
+      }
+    }
+  },
+  "H3-05": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "reason": "Training and testing a diagnostic algorithm is an allowed purpose (Art. 53). Statistics are requested and answer the question (Art. 69).",
+    "answer": {
+      "female": {
+        "18-49": {
+          "adults": 3936,
+          "with_af": "<10",
+          "prevalence_pct": "suppressed"
+        },
+        "50-64": {
+          "adults": 1760,
+          "with_af": 13,
+          "prevalence_pct": 0.7
+        },
+        "65-79": {
+          "adults": 1269,
+          "with_af": 75,
+          "prevalence_pct": 5.9
+        },
+        "80+": {
+          "adults": 553,
+          "with_af": 64,
+          "prevalence_pct": 11.6
+        }
+      },
+      "male": {
+        "18-49": {
+          "adults": 3763,
+          "with_af": "<10",
+          "prevalence_pct": "suppressed"
+        },
+        "50-64": {
+          "adults": 1683,
+          "with_af": 22,
+          "prevalence_pct": 1.3
+        },
+        "65-79": {
+          "adults": 1166,
+          "with_af": 87,
+          "prevalence_pct": 7.5
+        },
+        "80+": {
+          "adults": 586,
+          "with_af": 87,
+          "prevalence_pct": 14.8
+        }
+      }
+    }
+  },
+  "H3-06": {
+    "decision": "APPROVE_SPE",
+    "articles": [
+      "53",
+      "66",
+      "68",
+      "73"
+    ],
+    "reason": "Research and algorithm development are allowed (Art. 53). Per-patient timelines are needed, so pseudonymised data is justified (Art. 66). Access only under a data permit in a secure processing environment (Art. 68, 73).",
+    "answer": {
+      "cohort_size": 190
+    }
+  },
+  "H3-07": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "66",
+      "69"
+    ],
+    "reason": "Education is an allowed purpose (Art. 53). No reason is given why statistics are not enough, so records are not justified (Art. 66). Approved as statistics (Art. 69).",
+    "answer": {
+      "0-17": {
+        "patients_with_asthma": 209,
+        "ics_laba_pct": 44.5,
+        "lama_pct": "suppressed"
+      },
+      "18-64": {
+        "patients_with_asthma": 672,
+        "ics_laba_pct": 40.2,
+        "lama_pct": "suppressed"
+      },
+      "65+": {
+        "patients_with_asthma": 213,
+        "ics_laba_pct": 39.0,
+        "lama_pct": "suppressed"
+      }
+    }
+  },
+  "H3-08": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "reason": "Policy-making and research are allowed purposes (Art. 53). Statistics answer the question (Art. 69).",
+    "answer": {
+      "Burgenland": {
+        "adults_with_depression": 32,
+        "on_ssri": 16,
+        "on_ssri_pct": 50.0
+      },
+      "Kärnten": {
+        "adults_with_depression": 74,
+        "on_ssri": 35,
+        "on_ssri_pct": 47.3
+      },
+      "Niederösterreich": {
+        "adults_with_depression": 201,
+        "on_ssri": 99,
+        "on_ssri_pct": 49.3
+      },
+      "Oberösterreich": {
+        "adults_with_depression": 195,
+        "on_ssri": 81,
+        "on_ssri_pct": 41.5
+      },
+      "Salzburg": {
+        "adults_with_depression": 70,
+        "on_ssri": 39,
+        "on_ssri_pct": 55.7
+      },
+      "Steiermark": {
+        "adults_with_depression": 125,
+        "on_ssri": 54,
+        "on_ssri_pct": 43.2
+      },
+      "Tirol": {
+        "adults_with_depression": 90,
+        "on_ssri": 46,
+        "on_ssri_pct": 51.1
+      },
+      "Vorarlberg": {
+        "adults_with_depression": 53,
+        "on_ssri": 23,
+        "on_ssri_pct": 43.4
+      },
+      "Wien": {
+        "adults_with_depression": 239,
+        "on_ssri": 112,
+        "on_ssri_pct": 46.9
+      }
+    }
+  },
+  "H3-09": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "reason": "Quality of care is an allowed purpose (Art. 53). Statistics answer the question (Art. 69).",
+    "answer": {
+      "Klinikum Nord": {
+        "patients_with_ckd": 162,
+        "patients_with_egfr": 162,
+        "mean_egfr": 45.1,
+        "egfr_below_45_pct": 45.7,
+        "sglt2_pct": 6.2
+      },
+      "Klinikum Süd": {
+        "patients_with_ckd": 151,
+        "patients_with_egfr": 151,
+        "mean_egfr": 45.1,
+        "egfr_below_45_pct": 46.4,
+        "sglt2_pct": 8.6
+      },
+      "Klinikum West": {
+        "patients_with_ckd": 101,
+        "patients_with_egfr": 101,
+        "mean_egfr": 43.5,
+        "egfr_below_45_pct": 56.4,
+        "sglt2_pct": "suppressed"
+      }
+    }
+  },
+  "H3-10": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "reason": "Health system planning is an allowed purpose (Art. 53). Statistics answer the question (Art. 69).",
+    "answer": {
+      "0-17": {
+        "stays": 75,
+        "patients": 75
+      },
+      "18-64": {
+        "stays": 140,
+        "patients": 140
+      },
+      "65+": {
+        "stays": 15,
+        "patients": 15
+      }
+    }
+  }
+}

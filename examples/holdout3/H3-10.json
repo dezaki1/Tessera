@@ -1,0 +1,19 @@
+{
+  "id": "H3-10",
+  "submitted": "2026-10-30T13:05:00+01:00",
+  "applicant": {
+    "name": "Dr. Martina Leitgeb",
+    "organisation": "Landesgesundheitsfonds Niederösterreich, hospital planning unit",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Capacity planning for paediatric and adult wards during the respiratory infection season. We need to know how many hospital admissions are mainly due to pneumonia and in which age groups.",
+  "question": "How many inpatient stays had pneumonia as the main diagnosis from 2023 to 2025, and how many different patients did they involve, by age band?",
+  "definitions": [
+    "Inpatient stay = encounter with type 'inpatient' and a start_date from 1 January 2023 to 31 December 2025.",
+    "Pneumonia as main diagnosis = primary_icd10 of the stay starting with J18.",
+    "Age bands use the patient's age on 31 December 2025: 0-17, 18-64, 65+.",
+    "Report per age band: number of inpatient stays with pneumonia as main diagnosis and the number of distinct patients with such a stay."
+  ]
+}

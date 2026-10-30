@@ -1,0 +1,22 @@
+{
+  "id": "H3-04",
+  "submitted": "2026-10-30T10:30:00+01:00",
+  "applicant": {
+    "name": "Dr. Henrik Lindqvist",
+    "organisation": "Nordavia Pharma AB, global pharmacovigilance",
+    "country": "SE"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "As marketing authorisation holder for an SGLT2 inhibitor we run a post-authorisation safety study requested by the regulator. We need real-world background figures on kidney function in current SGLT2 users, by age, to put spontaneous adverse event reports of acute kidney injury into context and to update the risk management plan.",
+  "question": "Among adults currently on an SGLT2 inhibitor, how common is chronic kidney disease and what is their mean eGFR, by age band?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "SGLT2 inhibitor = ATC code starting with A10BK.",
+    "Currently on = prescription active on 31 December 2025: start_date on or before that day and end_date empty or on or after that day.",
+    "Chronic kidney disease = any condition with an ICD-10 code starting with N18.",
+    "Use the latest eGFR (LOINC 62238-1) per patient; patients without an eGFR are left out of the mean.",
+    "Age bands on 31 December 2025: 18-49, 50-64, 65-74, 75+.",
+    "Report per band: adults on an SGLT2 inhibitor, how many of them have chronic kidney disease, that share in % (one decimal), how many have an eGFR value and their mean eGFR (one decimal)."
+  ]
+}

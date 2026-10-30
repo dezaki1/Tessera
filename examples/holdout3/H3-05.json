@@ -1,0 +1,21 @@
+{
+  "id": "H3-05",
+  "submitted": "2026-10-30T11:00:00+01:00",
+  "applicant": {
+    "name": "Lea Mayrhofer",
+    "organisation": "PulseTrace GmbH (seed-stage medtech startup)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We are training a diagnostic model that detects atrial fibrillation from smartwatch ECG strips, aiming for CE marking as a medical device. To set realistic prevalence priors and to stratify our validation sample, we need population-level prevalence of atrial fibrillation by sex and age.",
+  "question": "What is the prevalence of atrial fibrillation among adults, broken down by sex and age band?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Atrial fibrillation = any condition with an ICD-10 code starting with I48.",
+    "Sex = the sex column ('female' or 'male').",
+    "Age bands on 31 December 2025: 18-49, 50-64, 65-79, 80+.",
+    "Prevalence = adults with atrial fibrillation / all adults in the group × 100, one decimal.",
+    "Report per sex and age band: adults, adults with atrial fibrillation and the prevalence in %."
+  ]
+}

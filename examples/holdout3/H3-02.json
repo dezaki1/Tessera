@@ -1,0 +1,20 @@
+{
+  "id": "H3-02",
+  "submitted": "2026-10-30T09:40:00+01:00",
+  "applicant": {
+    "name": "Oliver Brandstätter",
+    "organisation": "Kestrel Credit Insights",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Kestrel builds scorecards for consumer lenders. Our clients see higher default rates among borrowers with long-term illness. We want to add a regional chronic-disease factor to our credit model so that lenders can decline or reprice loan applications from customers whose health profile signals elevated repayment risk.",
+  "question": "How many adults have chronic kidney disease or heart failure, per region and age band?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Chronic kidney disease = any condition with an ICD-10 code starting with N18.",
+    "Heart failure = any condition with an ICD-10 code starting with I50.",
+    "Age bands on 31 December 2025: 18-39, 40-59, 60+.",
+    "Report per region and age band: adults with chronic kidney disease or heart failure."
+  ]
+}

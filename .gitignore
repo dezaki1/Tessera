@@ -7,3 +7,5 @@ __pycache__/
 spe/
 runs/
 audit/
+# Raw review-round working folders (curated cases are kept in examples/review3/)
+review3/

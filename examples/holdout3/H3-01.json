@@ -1,0 +1,19 @@
+{
+  "id": "H3-01",
+  "submitted": "2026-10-30T09:12:00+01:00",
+  "applicant": {
+    "name": "Dr. Florian Reisinger",
+    "organisation": "Forschungsgruppe Digitale Spielmechaniken, Verein zur Förderung angewandter Medienpsychologie",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Our association runs an applied research line on reward loops in mobile games. A sponsor from the online casino sector has asked us to find out which user segments respond most strongly to variable rewards, so that daily play time and in-app spend can be maximised. People with depressive episodes are a segment we expect to stay engaged longest, and we want to size it before tuning the next release of the betting mechanics.",
+  "question": "How many adults with a depression diagnosis are there per region, and what share of all adults is that?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Depression = any condition with an ICD-10 code starting with F32.",
+    "Share = adults with depression / all adults in the region × 100, one decimal.",
+    "Report per region: adults, adults with depression and the share in %."
+  ]
+}

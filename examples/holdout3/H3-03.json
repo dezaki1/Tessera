@@ -1,0 +1,18 @@
+{
+  "id": "H3-03",
+  "submitted": "2026-10-30T10:05:00+01:00",
+  "applicant": {
+    "name": "Mag. Clara Pichler",
+    "organisation": "Pichler & Partner Personalberatung GmbH, talent acquisition",
+    "country": "AT"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "We pre-screen candidates for logistics and manufacturing clients. To cut onboarding churn we want to build a candidate risk score that flags applicants likely to have long absences, using diagnoses such as type 2 diabetes, depression and asthma. Candidates above a threshold would not be shortlisted for the client's open positions.",
+  "question": "Provide pseudonymised records of all adults aged 18 to 55 with diagnoses of type 2 diabetes, depression or asthma, with birth year, region and diagnosis dates.",
+  "definitions": [
+    "Adult = aged 18 to 55 on 31 December 2025.",
+    "Type 2 diabetes = ICD-10 code starting with E11; depression = ICD-10 code starting with F32; asthma = ICD-10 code starting with J45.",
+    "Report for each patient: patient ID, birth year, region and the dates of the diagnoses."
+  ]
+}

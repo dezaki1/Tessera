@@ -1,0 +1,21 @@
+{
+  "id": "H3-08",
+  "submitted": "2026-10-30T12:15:00+01:00",
+  "applicant": {
+    "name": "Mag. Daniel Hörtnagl",
+    "organisation": "Österreichische Gesellschaft für Psychische Gesundheit, Arbeitsgruppe Versorgungsforschung",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We are preparing a position paper for the federal states on access to treatment for depression. We want to see whether drug treatment rates differ between regions, as a first indicator of unequal access to care.",
+  "question": "In each federal state, how many adults have been diagnosed with depression and how many of them are currently taking an SSRI antidepressant?",
+  "definitions": [
+    "Adults are people who were at least 18 years old at the end of 2025.",
+    "Depression means a recorded diagnosis of a depressive episode.",
+    "SSRI antidepressants means the drug class of selective serotonin reuptake inhibitors.",
+    "Currently taking means the prescription had started by 31 December 2025 and had not ended before that day.",
+    "Treatment rate = adults with depression currently taking an SSRI / adults with depression × 100, one decimal.",
+    "Report per federal state: adults with depression, how many of them currently take an SSRI and the treatment rate."
+  ]
+}

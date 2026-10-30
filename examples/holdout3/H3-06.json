@@ -1,0 +1,20 @@
+{
+  "id": "H3-06",
+  "submitted": "2026-10-30T11:25:00+01:00",
+  "applicant": {
+    "name": "Prof. Dr. Katrin Ebner",
+    "organisation": "Medizinische Universität Graz, Institut für Kardiovaskuläre Versorgungsforschung",
+    "country": "AT"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "We are developing and externally validating a 30-day readmission risk score for patients with heart failure. The model works on each patient's timeline: the sequence and spacing of hospital stays, diuretic and other prescriptions around discharge and comorbidities. Readmission is defined per stay and per patient, so pre-aggregated tables cannot reproduce the outcome or the predictors; we need pseudonymised patient-level histories inside the secure environment and will export only coefficients and validation metrics.",
+  "question": "Make pseudonymised conditions, medications and encounters available for adults with heart failure who had at least one inpatient stay in 2024 or 2025.",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Heart failure = any condition with an ICD-10 code starting with I50.",
+    "Inpatient stay = encounter with type 'inpatient' whose start_date is between 1 January 2024 and 31 December 2025.",
+    "Cohort = adults with heart failure who have at least one such inpatient stay.",
+    "Report the number of patients in the cohort."
+  ]
+}
