@@ -18,9 +18,12 @@
 {% if r.answer_table %}
 <div class="card">
   <h2>Your answer (anonymised statistics)</h2>
+  {% set ns = namespace(hidden=0, total=0) %}
+  {% for row in r.answer_table.rows %}{% for v in row['values'] %}{% set ns.total = ns.total + 1 %}{% if v is string %}{% set ns.hidden = ns.hidden + 1 %}{% endif %}{% endfor %}{% endfor %}
+  <p class="info small"><strong>Privacy protection:</strong> "&lt;10" means fewer than 10 patients (including none);
+  "suppressed" means a percentage or mean rests on fewer than 10 patients and is withheld.
+  {% if ns.hidden %}{{ ns.hidden }} of {{ ns.total }} values in this table are protected this way.{% else %}No value needed protecting.{% endif %}</p>
   {% include "_answer.html" %}
-  <p class="small muted">"&lt;10" means fewer than 10 patients (including none). "suppressed" means the value rests on
-  fewer than 10 patients and is withheld to protect privacy.</p>
 </div>
 {% endif %}
 
@@ -34,9 +37,11 @@
 </div>
 {% endif %}
 
-{% if r.how_we_counted %}
+{% if r.how_we_counted and (r.how_we_counted.numbers or r.how_we_counted.cohort or r.how_we_counted.assumptions) %}
 <div class="card">
   <h2>How we counted</h2>
+  {% if r.how_we_counted.cohort %}<p><strong>Patients included:</strong> {{ r.how_we_counted.cohort.patients }}</p>
+  <p><strong>Record types copied:</strong> {{ r.how_we_counted.cohort.records|join(', ') }}</p>{% endif %}
   {% if r.how_we_counted.groups %}<p><strong>Groups:</strong> {{ r.how_we_counted.groups|join('; ') }}</p>{% endif %}
   {% if r.how_we_counted.numbers %}
   <table class="small">{% for n in r.how_we_counted.numbers %}<tr><td><strong>{{ n.label }}</strong></td><td>{{ n.definition }}</td></tr>{% endfor %}</table>

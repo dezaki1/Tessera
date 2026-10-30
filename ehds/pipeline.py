@@ -173,7 +173,7 @@ class AccessBody:
             "download": "blocked",
             "url": f"/spe/{request_id}",
         }
-        result["how_we_counted"] = {"assumptions": parsed.assumptions}
+        result["how_we_counted"] = {"cohort": explain.cohort(parsed.cohort), "assumptions": parsed.assumptions}
         result["staff"]["sql"] = [manifest["cohort_sql"]]
         result["notes"].append("The cohort size is exact. The records stay inside the secure processing "
                                "environment; downloads are blocked and logged (Art. 73).")

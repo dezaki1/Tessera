@@ -28,13 +28,29 @@ different hash seed) and scores the README metrics:
 Loading the data takes about 1 s, once, when the app starts. The full per-request table is written to
 `runs/report.md`. `expected.json` is read only by the evaluation script, never by the app.
 
+The same script then scores a second set, `examples/jury/`: 8 requests written by an independent reviewer
+in the jury's style (grouping by hospital, inpatient stays filtered by `primary_icd10`, both combined,
+shares, means, age bands, an SPE application). Their expected answers were computed twice, independently,
+with plain pandas (no app code):
+
+| Metric (jury-style set) | Result | Target |
+|---|---|---|
+| Correct decisions | 8/8 | 8 of 8 |
+| Correct numbers | 8/8 | 8 of 8 |
+| Privacy leaks | 0 | 0 |
+| Consistency (3 runs) | 8/8 | 8 of 8 |
+| Slowest time to answer | 0.07 s | under 60 s |
+
+Before the fixes described under "Independent review" below, only 3 of these 8 were fully correct.
+
 How the checks work:
 
 - **Correct numbers.** Every expected value must appear under its group, as the README defines it.
 - **Privacy leaks.** The script re-runs each query on its own and compares every released cell with the raw
   numbers. A count under 10 that isn't `<10` counts as a leak. So does a percentage or mean resting on fewer
-  than 10 patients that isn't `suppressed`, a group that's missing, a patient ID anywhere in a statistical
-  answer, or an opted-out patient in the store or in any SPE copy. `tests/test_evaluation.py` checks that
+  than 10 patients that isn't `suppressed`, a count or share of stays that come from fewer than 10 patients,
+  a group that's missing, a patient ID anywhere in a statistical answer, or an opted-out patient in the
+  store or in any SPE copy. `tests/test_evaluation.py` checks that
   these checks catch tampered answers.
 - **Consistency.** Compares the full applicant and staff output (everything except the timing) across the
   3 runs.
@@ -61,7 +77,29 @@ diagnosis named only in the question was added as a filter. The parser now split
 question-only qualifiers automatically only for age, sex, region, hospital and defined concepts (anything
 else is listed for staff), lets a population named once apply to every mean, and flags any phrase that
 seems to ask for more than one number. Both requests now match pandas exactly and are part of the
-tests. In total 269 tests pass.
+tests.
+
+**Independent review.** Four read-only reviewers were then run in parallel, and every finding was
+reproduced before it was fixed:
+
+- A **privacy attacker** found that overlapping age bands (18-91 and 18-92) revealed a hidden `<10` count
+  by subtraction, and that stays coming from fewer than 10 patients were released (11 stays of 5 people).
+  Both are now blocked centrally: the engine refuses overlapping bands, and `disclosure.py` hides stay counts
+  and shares behind fewer than 10 patients. Its other attacks failed: file and network access from the SPE
+  query box, opted-out patients, patient-level rows and downloads.
+- A **jury simulator** wrote the 8 requests above. Three gave wrong numbers with no warning: "women and men"
+  emptied every group, an HbA1c threshold was ignored, and an SPE cohort lost its stay condition (3,574
+  patients instead of 10). All are fixed. As a safety net, the pipeline now builds no SPE when the cohort and
+  the requested count disagree.
+- A **legal reviewer** checked reasons against Chapter IV. Reasons now cite the exact point of Art. 53(1)
+  or 54 and quote the applicant's sentence on rejection. A private body relying only on Art. 53(1)(a)–(c)
+  is flagged (Art. 53(2)). An application announcing re-identification gets no SPE. No reason claims an
+  allowed purpose when none was recognised.
+- A **demo critic** reviewed the UI and this README. Answers now show "Hospital" and names with codes
+  ("breast cancer (ICD-10 C50*)"), the privacy legend sits above the table with a count of protected values,
+  the SPE decision explains its cohort, and the staff tables scroll on phones.
+
+`tests/test_review_findings.py` holds a regression test for every finding. In total 299 tests pass.
 
 ## Run it
 
@@ -156,19 +194,39 @@ patient. Opted-out patients are excluded from every number, denominator and SPE 
 
 - **Live LLM path not exercised.** The sandbox this was built in has no API access. The cache and fallback
   paths are unit-tested; a live call stops at authentication.
-- **Unverified legal sub-points.** EUR-Lex was not reachable from the build environment. Reasons therefore
-  cite article numbers (53, 54, 66, 68, 69, 73) with the plain-language ground, but not sub-point letters.
+- **No login.** This is a demo. The staff desk and SPE workspaces are open to anyone who has the URL. A real
+  access body would authenticate staff and tie each SPE to its permit holder.
+- **Public-body check is a heuristic.** Art. 53(2) reserves points (a)–(c) for public sector bodies. The app
+  guesses from the organisation name and only flags the case for staff; it never rejects on that basis.
 - **Rule-only purpose classification.** It catches the sample cases and the tested variants, but new wording
   can slip past it. Weak signals are flagged to staff rather than decided.
 - **Rule parser coverage.** It covers counts, percentages and means (of the latest measurement, age or
   length of stay), grouped by region, hospital, sex, age band, visit type and year. Other groupings or
   statistics (medians, postcodes) are reported as not interpreted and go to staff review, or to the LLM
   fallback if enabled.
-- **No secondary suppression.** The small-cell rule is applied exactly as specified. A hidden small count can
-  still sometimes be worked out by subtracting two published numbers (e.g. total minus a visible subgroup).
-  A production system would add secondary suppression.
+- **Limited secondary suppression.** Overlapping age bands are refused, so one answer cannot be used to
+  subtract a hidden cell. A hidden small count can still sometimes be worked out across two separate
+  requests, or from a total minus a visible subgroup. A production system would add full secondary
+  suppression and track what each applicant has already received.
 - **No output checking in the SPE.** The SPE blocks every download. A real one would also have an output
   checking step for releasing results such as model weights.
+
+## How we used IBM Bob
+
+IBM Bob (the event's required AI development partner) did one self-contained task in this project: making
+the Art. 54 purpose check robust to new wording. The task brief is in `docs/bob/TASK_BRIEF.md` and the session
+report in `docs/bob/session_report_purpose_check.html`. Bob:
+
+1. wrote `tests/test_purpose_robustness.py` first: 43 prohibited and 57 allowed purposes, with indirect and
+   non-native wording and look-alikes (study exclusion criteria, cessation apps, insurance cost studies);
+2. measured the baseline: 16 of the 100 failed, all of them prohibited purposes that were approved;
+3. extended the rules in `ehds/decision.py` until all 100 passed, adding an allowed look-alike test for
+   every rule it loosened, while keeping every existing test and the evaluation metrics unchanged;
+4. wrote the "Purpose check" section below.
+
+The rest of the app (data store, parser, engine, disclosure, SPE, UI and evaluation) was built with Claude
+Code. Later reviews found three more prohibited wordings that slipped past, and they were fixed the same
+way (`tests/test_decision.py`).
 
 ## Purpose check
 

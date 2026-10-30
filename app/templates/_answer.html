@@ -1,7 +1,8 @@
+{% set DIM = {'data_holder': 'Hospital', 'age_band': 'Age band', 'region': 'Region', 'sex': 'Sex', 'encounter_year': 'Year', 'encounter_type': 'Visit type'} %}
 {% set t = r.answer_table %}
 {% if t %}
 <div class="scroll"><table>
-  <tr>{% for d in t.dimensions %}<th>{{ d.replace('_', ' ')|capitalize }}</th>{% endfor %}
+  <tr>{% for d in t.dimensions %}<th>{{ DIM.get(d, d.replace('_', ' ')|capitalize) }}</th>{% endfor %}
       {% for c in t.columns %}<th>{{ c.label }}</th>{% endfor %}</tr>
   {% for row in t.rows %}
   <tr>{% for g in row.group %}<td>{{ g }}</td>{% endfor %}

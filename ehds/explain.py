@@ -3,6 +3,24 @@
 from __future__ import annotations
 
 from .spec import CohortSpec, Criterion, Dimension, EncounterFilter, Metric, QuerySpec
+from .terminology import _CONDITIONS, _MEASUREMENTS, _MEDICATIONS
+
+
+def _names(table: dict) -> dict:
+    """Code prefixes -> the plain name used for them ("C50" -> "breast cancer")."""
+    out = {}
+    for names, codes in table.items():
+        key = (codes,) if isinstance(codes, str) else tuple(codes)
+        out.setdefault(key, names.split("|")[0])
+    return out
+
+
+CONDITION_NAMES, DRUG_NAMES, MEASUREMENT_NAMES = _names(_CONDITIONS), _names(_MEDICATIONS), _names(_MEASUREMENTS)
+
+
+def _named(prefixes, names: dict) -> str:
+    name = names.get(tuple(prefixes)) or (names.get((prefixes[0],)) if len(prefixes) == 1 else None)
+    return f"{name} " if name else ""
 
 _UNITS = {"%": "%"}
 
@@ -38,14 +56,16 @@ def criterion(c: Criterion) -> str:
     elif c.kind == "data_holder":
         text = f"record held by {', '.join(c.values)}"
     elif c.kind == "condition":
-        text = f"a diagnosis in conditions.csv coded {_codes(c.icd10_prefixes)}"
+        text = f"a diagnosis of {_named(c.icd10_prefixes, CONDITION_NAMES)}(ICD-10 {_codes(c.icd10_prefixes)})"
     elif c.kind == "medication":
-        text = f"{'an active' if c.active else 'any'} prescription coded ATC {_codes(c.atc_prefixes)}"
+        text = (f"{'an active' if c.active else 'any'} prescription of {_named(c.atc_prefixes, DRUG_NAMES)}"
+                f"(ATC {_codes(c.atc_prefixes)})")
     elif c.kind == "observation":
         which = "latest" if c.which == "latest" else "any"
-        text = f"a measurement LOINC {c.loinc}"
+        name = MEASUREMENT_NAMES.get((c.loinc,), "measurement")
+        text = f"a {name} value (LOINC {c.loinc})"
         if c.comparator:
-            text = f"{which} value of LOINC {c.loinc} {c.comparator} {c.threshold}"
+            text = f"{which} {name} (LOINC {c.loinc}) {c.comparator} {c.threshold}"
     elif c.kind == "has_encounter":
         text = f"at least one {_visit(c.filter)}"
     elif c.kind == "encounter":
@@ -70,7 +90,7 @@ def metric(m: Metric, by_name: dict[str, Metric]) -> str:
                 "one decimal.")
     v = m.value
     value = {"age": "age on 31 Dec 2025", "length_of_stay": "length of stay in days"}.get(
-        v.source, f"latest value of LOINC {v.loinc} per patient")
+        v.source, f"latest {MEASUREMENT_NAMES.get((v.loinc,), 'value')} (LOINC {v.loinc}) per patient")
     return f"Mean of the {value}, over {what}: {criteria(m.criteria)}; one decimal."
 
 
@@ -87,8 +107,9 @@ def spec(s: QuerySpec) -> dict:
         "groups": [dimension(d) for d in s.dimensions] or ["no grouping (one total)"],
         "numbers": [{"name": m.name, "label": m.label, "definition": metric(m, by_name)}
                     for m in s.metrics if m.visible],
-        "active_medication": ("start_date on or before 31 Dec 2025 and end_date empty or on/after it"
-                              if s.medication_active_rule == "start_and_end" else "end_date empty"),
+        "active_medication": None if not any(c.kind == "medication" and c.active for m in s.metrics for c in m.criteria)
+        else ("start_date on or before 31 Dec 2025 and end_date empty or on/after it"
+              if s.medication_active_rule == "start_and_end" else "end_date empty"),
     }
 
 

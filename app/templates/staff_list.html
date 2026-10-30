@@ -4,7 +4,7 @@
 <h1>Staff desk</h1>
 <p class="muted">Every decided request with its outcome. Open one for the rule trace, the interpreted query and the SQL.</p>
 <form method="post" action="/staff/run-samples"><button class="secondary">Process all sample requests</button></form>
-<div class="card" style="margin-top:16px">
+<div class="card scroll" style="margin-top:16px">
 <table>
   <tr><th>Request</th><th>Applicant</th><th>Decision</th><th>Articles</th><th>Status</th><th>Flags</th><th>Time</th></tr>
   {% for r in results %}

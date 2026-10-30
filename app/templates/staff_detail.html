@@ -15,7 +15,7 @@
      Opted-out patients excluded: {{ r.staff.opted_out_excluded }} · Processing time: {{ r.staff.timing_ms }} ms</p>
 </div>
 {% if r.staff.flags %}<div class="alert"><strong>For review</strong><ul class="tight">{% for f in r.staff.flags %}<li>{{ f }}</li>{% endfor %}</ul></div>{% endif %}
-<div class="card">
+<div class="card scroll">
   <h2>Decision rules, in order</h2>
   <table class="trace">
     {% for f in r.staff.trace %}<tr><td>{{ f.rule }}</td><td class="{{ 'matched' if f.outcome == 'matched' }}">{{ f.outcome }}</td>
@@ -26,7 +26,7 @@
   <h2>Definitions as interpreted <span class="small muted">(parser: {{ r.staff.parse.method }})</span></h2>
   <table class="small">{% for name, d in r.staff.parse.concepts.items() %}<tr><td><strong>{{ name }}</strong></td><td>{{ d }}</td></tr>{% endfor %}</table>
   {% if r.how_we_counted and r.how_we_counted.numbers %}
-  <h3>Numbers</h3><table class="small">{% for n in r.how_we_counted.numbers %}<tr><td><strong>{{ n.name }}</strong></td><td>{{ n.definition }}</td></tr>{% endfor %}</table>
+  <h3>Numbers</h3><table class="small">{% for n in r.how_we_counted.numbers %}<tr><td><strong>{{ n.label }}</strong><br><span class="muted">{{ n.name }}</span></td><td>{{ n.definition }}</td></tr>{% endfor %}</table>
   {% endif %}
   {% if r.staff.parse.assumptions %}<h3>Assumptions</h3><ul class="tight small">{% for a in r.staff.parse.assumptions %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
   {% if r.staff.parse.unresolved %}<h3>Not interpreted</h3><ul class="tight small">{% for a in r.staff.parse.unresolved %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
