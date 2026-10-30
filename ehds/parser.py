@@ -70,6 +70,21 @@ REFERENCE_DATE_RE = re.compile(r"\b(?:on|at|as of)?\s*31\s+December\s+2025\b", I
 OTHER_DATE_RE = re.compile(
     r"\b\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|"
     r"November|December)\s+\d{4}\b", I)
+_MONTHS = ("january", "february", "march", "april", "may", "june", "july", "august", "september", "october",
+           "november", "december")
+_DATE = (r"(?:\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)"
+         r"\s+\d{4}|\d{4}-\d{2}-\d{2})")
+# "between 1 January 2024 and 31 December 2025", "from 2023-01-01 to 2025-12-31"
+DATE_RANGE_RE = re.compile(rf"\b(?:between|from)\s+({_DATE})\s+(?:and|to|until|through|till)\s+({_DATE})\b", I)
+
+
+def _parse_date(text: str) -> date:
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
+        return date.fromisoformat(text)
+    day, month, year = text.split()
+    return date(int(year), _MONTHS.index(month.lower()) + 1, int(day))
+
+
 PATIENT_LEVEL_RE = re.compile(
     r"\b(for each patient|per patient|each individual|patient[ _-]?ids?|birth ?dates?|"
     r"dates? of birth|patient names?|address(?:es)?|social security)\b", I)
@@ -211,7 +226,13 @@ def _slug(text: str, limit: int = 60) -> str:
 
 def _clean_phrase(text: str) -> str:
     text = FORMAT_RE.sub("", text)
+    # The reference date is dropped, except as the end of a period ("between 1 January 2024 and 31 December 2025").
+    ranges = [m.group(0) for m in DATE_RANGE_RE.finditer(text)]
+    for i, r in enumerate(ranges):
+        text = text.replace(r, f"\x00{i}\x00", 1)
     text = REFERENCE_DATE_RE.sub("", text)
+    for i, r in enumerate(ranges):
+        text = text.replace(f"\x00{i}\x00", r, 1)
     return re.sub(r"\s+", " ", text).strip(" .,;:")
 
 
@@ -297,9 +318,10 @@ class _Context:
                 r.unresolved.append(f"{sentence} ({exc})")
             except (ValidationError, ValueError) as exc:  # e.g. an age band "under 0"
                 r.unresolved.append(f"{sentence} (not valid: {str(exc).splitlines()[0][:120]})")
-        if OTHER_DATE_RE.search(" ".join(self.definitions)) and any(
-            m.group(0).lower() != "31 december 2025" for m in OTHER_DATE_RE.finditer(" ".join(self.definitions))
-        ):
+        # Dates that bound a period ("between 1 January 2024 and 31 December 2025") are applied as periods;
+        # any other date would be a different reference date.
+        loose = DATE_RANGE_RE.sub(" ", " ".join(self.definitions))
+        if any(m.group(0).lower() != "31 december 2025" for m in OTHER_DATE_RE.finditer(loose)):
             r.unresolved.append("A reference date other than 31 December 2025 is mentioned; only 31 December 2025 is supported.")
         everything = " ".join([self.question, *self.definitions])
         if re.search(r"\b(?:includ\w*|with|also|even)\b[^.]{0,40}\bopt(?:ed)?[- ]?outs?\b", everything, I):
@@ -724,6 +746,12 @@ class _Context:
 
     def _year_atoms(self, text: str) -> list[Atom]:
         atoms = []
+        for m in DATE_RANGE_RE.finditer(text):
+            try:
+                period = (_parse_date(m.group(1)), _parse_date(m.group(2)))
+            except ValueError:
+                continue  # an impossible date stays unapplied and is reported
+            atoms.append(Atom(m.start(), m.end(), m.group(0), "year", key=f"year:{period}", years=period, priority=3))
         for pattern, how in self._YEAR_PATTERNS:
             for m in pattern.finditer(text):
                 if how == "range":

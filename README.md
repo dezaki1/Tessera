@@ -159,13 +159,15 @@ was reproduced before it was fixed (`tests/test_review3.py`), and their cases ar
   review. Secondary disclosure (below) remains a known limitation.
 
 **Blind hold-out set.** `examples/holdout3/` (10 requests with pandas answers) was written at the start of
-round 3 and nobody read or ran it until the final scoring, after all fixes. It is reported untuned in the
-table below, and its misses are listed under Limitations.
+round 3 and nobody read or ran it until the final scoring, after all fixes. The table shows its blind score.
+After that run, one gap it exposed was fixed because it could copy the wrong patients into an SPE: a stay
+period given as exact dates (H3-06). With that fix it scores numbers 4/7. Its other misses are not fixed and
+are listed under Limitations.
 
 | Metric | Official (`requests/`) | Jury-style (`examples/jury/`) | Verifier (`examples/verifier/`) | Review 3 (`examples/review3/`) | Hold-out 3 (`examples/holdout3/`) |
 |---|---|---|---|---|---|
 | Correct decisions | 10/10 | 8/8 | 8/8 | 93/94 | 9/10 |
-| Correct numbers | 6/6 | 8/8 | 6/6 | 4/4 | 3/7 |
+| Correct numbers | 6/6 | 8/8 | 6/6 | 4/4 | 3/7 blind (4/7 after the H3-06 fix) |
 | Privacy leaks | 0 | 0 | 0 | 0 | 0 |
 | Consistency (3 runs) | 10/10 | 8/8 | 8/8 | 94/94 | 10/10 |
 | Slowest time to answer | 0.09 s | 0.06 s | 0.08 s | 0.15 s | 0.10 s |
@@ -174,7 +176,7 @@ table below, and its misses are listed under Limitations.
 python -m evaluation.run_eval --sets official,jury,verifier,review3,holdout3
 ```
 
-In total 505 tests pass.
+In total 508 tests pass.
 
 ## Run it
 
@@ -297,10 +299,10 @@ patient. Opted-out patients are excluded from every number, denominator and SPE 
   OFFSET. A real SPE would tie access to the permit holder and add an output checking step for results
   such as model weights.
 - **Parser gaps found by the hold-out set (not fixed, reported as found).**
-  - H3-06: an SPE whose stay condition has a date range ("between 1 January 2024 and 31 December 2025")
-    ignored the range, so the cohort had 248 patients instead of 190. The size cross-check didn't catch it
-    because the requested count was parsed the same way. This is the most serious gap: patient-level data for
-    58 patients outside the requested cohort would be copied into the SPE.
+  - H3-06 (fixed after the blind run): an SPE whose stays had a date range ("between 1 January 2024 and
+    31 December 2025") ignored the range, so the cohort had 248 patients instead of 190. Exact date ranges are
+    now applied as periods. As a safety net, no SPE is built when any part of the request was not understood.
+    Tests use other requests and check the cohort size against pandas.
   - H3-09: "eGFR below 45 = latest eGFR value strictly below 45" was not applied, so the share was 100%.
   - H3-04: the definition "Currently on = prescription active on 31 December 2025…" was not understood. The
     SGLT2 filter was dropped and the numbers were released with a warning.

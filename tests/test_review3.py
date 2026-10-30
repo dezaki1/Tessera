@@ -188,3 +188,45 @@ def test_spe_query_timeout(spe, monkeypatch):
         body.spe.query(rid, "SELECT count(*) FROM cohort a, cohort b, cohort c, cohort d", "t")
     last = json.loads(body.audit.path.read_text().splitlines()[-1])
     assert last["event"] == "spe_query_refused" and "stopped after" in last["error"]
+
+
+# --- hold-out finding H3-06: a stay period given as exact dates ---------------------------------
+
+def _pandas_cohort(icd: str, start: str, end: str) -> int:
+    import pandas as pd
+    data = ROOT / "data"
+    p = pd.read_csv(data / "patients.csv")
+    p = p[p["opted_out"].astype(str).str.lower() != "true"]
+    p = p[2025 - pd.to_datetime(p["birth_date"]).dt.year >= 18]
+    c = pd.read_csv(data / "conditions.csv")
+    e = pd.read_csv(data / "encounters.csv")
+    e = e[(e["type"] == "inpatient") & (e["start_date"] >= start) & (e["start_date"] <= end)]
+    ids = set(p["patient_id"]) & set(c.loc[c["icd10"].str.startswith(icd), "patient_id"]) & set(e["patient_id"])
+    return len(ids)
+
+
+@pytest.mark.parametrize("phrase, start, end", [
+    ("between 1 March 2023 and 31 December 2025", "2023-03-01", "2025-12-31"),
+    ("from 2024-07-01 to 2025-06-30", "2024-07-01", "2025-06-30"),
+])
+def test_spe_cohort_applies_a_stay_period_given_as_dates(body, phrase, start, end):
+    request = {"id": "D1", "applicant": {"organisation": "Medical University research group"},
+               "requested_as": "health data access application", "requested_format": "pseudonymised records",
+               "purpose": "We develop and validate a readmission prediction model; each patient's sequence of stays "
+                          "is needed, which aggregated tables cannot provide.",
+               "question": "Make pseudonymised encounters available for adults with COPD who had an inpatient stay.",
+               "definitions": ["Adult = aged 18 or older on 31 December 2025.",
+                               "COPD = any condition with an ICD-10 code starting with J44.",
+                               f"Inpatient stay = encounter with type 'inpatient' whose start_date is {phrase}.",
+                               "Cohort = adults with COPD who have at least one such inpatient stay.",
+                               "Report the number of patients in the cohort."]}
+    r = body.process(request)
+    assert r["status"] == "spe_ready", r["staff"]["flags"]
+    assert r["spe"]["cohort_size"] == _pandas_cohort("J44", start, end)
+
+
+def test_no_spe_when_part_of_the_request_is_not_understood(body):
+    request = json.loads((ROOT / "requests" / "R05.json").read_text())
+    request["definitions"] = request["definitions"] + ["Only patients seen on 15 March 2024 or later."]
+    r = body.process(request)
+    assert r["status"] == "needs_review" and r["spe"] is None

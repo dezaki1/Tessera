@@ -262,6 +262,14 @@ class AccessBody:
             result["notes"].append("The cohort or record types could not be determined automatically. "
                                    "A staff member will set up the secure processing environment.")
             return
+        if parsed.unresolved:
+            # Patient-level data is copied only when every part of the request was understood.
+            result["status"] = "needs_review"
+            result["staff"]["flags"].append("SPE not set up: parts of the request were not interpreted, so the cohort "
+                                            "may be wrong.")
+            result["notes"].append("Part of the request could not be interpreted automatically. A staff member will "
+                                   "check the cohort before the secure processing environment is set up.")
+            return
         mismatch = self._cohort_mismatch(parsed)
         if mismatch:
             result["status"] = "needs_review"
