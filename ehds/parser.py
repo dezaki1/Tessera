@@ -906,7 +906,7 @@ class _Context:
             "|" + p.pattern.replace("(?<![\\w-])", "") for c in self.concepts
             if c.name in concept_heads for p in c.patterns) + ")", I)
         phrases: list[str] = []
-        for sep, piece in _split_top_level(body, r",\s*|\s+and\s+|;\s*"):
+        for sep, piece in _split_top_level(body, r",\s*(?:and\s+)?|\s+and\s+|;\s*"):
             if phrases and sep and not starter_re.match(piece):
                 phrases[-1] = f"{phrases[-1]}{sep}{piece}" if sep.strip() else f"{phrases[-1]} {piece}"
             else:
@@ -953,7 +953,7 @@ class _Context:
             hidden.append(m)
             return m
 
-        for phrase in phrases:
+        for index, phrase in enumerate(phrases):
             if UNSUPPORTED_STAT_RE.search(phrase):
                 raise _Unresolved(f"'{phrase}': only counts, percentages and means are supported")
             if MEAN_RE.search(phrase):
@@ -962,6 +962,13 @@ class _Context:
                 kind = "percentage"
             else:
                 kind = "count"
+            # A phrase should ask for exactly one number. Two kinds of cue (or two means, or two
+            # shares) means the split went wrong; flag it instead of silently dropping a number.
+            mean_cues = len(MEAN_RE.findall(phrase))
+            share_cues = len(re.findall(r"\b(?:percent|percentage|share|proportion|prevalence|fraction|rate)\b", phrase, I))
+            if (mean_cues and share_cues) or mean_cues > 1 or share_cues > 1:
+                self.result.unresolved.append(
+                    f"'{phrase}' seems to ask for more than one number; only one was produced. Staff should check.")
             meaning = self._meaning(phrase, role=kind)
             meanings.append(meaning)
             for w in meaning.warnings:
@@ -1012,6 +1019,16 @@ class _Context:
                     raise _Unresolved(f"'{phrase}': cannot tell what to average")
                 reference = prev_count if (meaning.back_ref and prev_count) else base
                 criteria = list(reference.criteria) if reference else []
+                if reference is None and not meaning.criteria:
+                    # "mean BMI and mean HbA1c of adults with diabetes": the population is named once,
+                    # in a later phrase, and applies to both.
+                    later = next((self._meaning(nxt, role="mean") for nxt in phrases[index + 1:]
+                                  if self._meaning(nxt, role="mean").criteria), None)
+                    if later is None:
+                        raise _Unresolved(f"'{phrase}': the patients to average over are not stated")
+                    criteria = list(later.criteria)
+                    self.result.assumptions.append(
+                        f"'{phrase}' uses the patients named later in the Report line ({later.text}).")
                 criteria = _dedupe(criteria + meaning.criteria)
                 if meaning.value_source == "observation":
                     value = ValueSource(source="observation", loinc=meaning.measurement)
@@ -1025,7 +1042,7 @@ class _Context:
 
         # Restrictions stated in the question (or definitions) but not in the Report line.
         covered = set().union(*(m.keys for m in meanings)) if meanings else set()
-        restrictions = self._question_restrictions(covered)
+        restrictions = self._question_restrictions(covered, self._codes_used(metrics + hidden))
         for loinc in self.required_measurements:
             restrictions.append(ObservationCriterion(loinc=loinc))
         all_metrics = []
@@ -1036,7 +1053,26 @@ class _Context:
             all_metrics.append(m)
         return QuerySpec(dimensions=dims, metrics=all_metrics, medication_active_rule=self.active_rule)
 
-    def _question_restrictions(self, covered: set[str]) -> list:
+    @staticmethod
+    def _codes_used(metrics: list) -> set[str]:
+        """Every ICD-10 / ATC prefix the numbers already use, including main diagnoses of stays."""
+        codes: set[str] = set()
+        for m in metrics:
+            for c in m.criteria:
+                codes |= set(getattr(c, "icd10_prefixes", None) or [])
+                codes |= set(getattr(c, "atc_prefixes", None) or [])
+                f = getattr(c, "filter", None)
+                if f is not None and f.primary_icd10_prefixes:
+                    codes |= set(f.primary_icd10_prefixes)
+        return codes
+
+    def _question_restrictions(self, covered: set[str], codes_used: set[str]) -> list:
+        """Qualifiers that appear only in the question.
+
+        Applied automatically: age, sex, region and hospital, and concepts the request defines
+        (e.g. a defined "Breast cancer" the Report line does not repeat). A diagnosis or drug
+        named only in the question is not added on a guess; it is listed for staff instead.
+        """
         restrictions = []
         question_atoms = self._atoms(self.question)
         prev_end = 0
@@ -1045,6 +1081,18 @@ class _Context:
             prev_end = a.end
             keys = {a.key} | (set(a.concept.keys) if a.concept else set())
             if keys & covered or a.kind in ("measurement", "visit", "ratio", "year", "primary"):
+                continue
+            atom_codes = set()
+            if a.kind == "condition":
+                atom_codes = {p for c in a.criteria for p in getattr(c, "icd10_prefixes", [])}
+            elif a.kind == "medication":
+                atom_codes = set(a.med.atc_prefixes)
+            if atom_codes and any(x.startswith(y) or y.startswith(x) for x in atom_codes for y in codes_used):
+                continue  # already used by the numbers (e.g. as the main diagnosis of a stay)
+            if a.concept is None and a.kind in ("condition", "medication", "composite"):
+                self.result.unresolved.append(
+                    f"'{a.text}' in the question is not part of the Report line or the definitions, so it was "
+                    "not applied. Staff should check whether the numbers should be restricted to it.")
                 continue
             neg = bool(NEGATION_RE.search(window))
             if a.kind == "medication":

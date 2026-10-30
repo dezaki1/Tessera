@@ -52,7 +52,16 @@ patients with an emergency visit in 2024, hospital filters on stays, requests wi
 from the question), and commercial but allowed purposes. Each is checked against an independent pandas
 calculation. 35 of 39 passed at first; the parser was fixed for the other 4 and all now pass. The purpose
 check has its own adversarial set (`tests/test_purpose_robustness.py`, 100 cases, built with IBM Bob, see
-`docs/bob/`) plus indirect wordings in `tests/test_decision.py`. In total 261 tests pass.
+`docs/bob/`) plus indirect wordings in `tests/test_decision.py`.
+
+**Audit.** A later audit wrote two more requests from scratch (atrial fibrillation per hospital with a
+share and a mean; stays with main diagnosis J18 or N39 by age band with length of stay) and compared them
+with plain pandas. Both were silently wrong: a ", and their mean …" merged two numbers into one, and a
+diagnosis named only in the question was added as a filter. The parser now splits on ", and", applies
+question-only qualifiers automatically only for age, sex, region, hospital and defined concepts (anything
+else is listed for staff), lets a population named once apply to every mean, and flags any phrase that
+seems to ask for more than one number. Both requests now match pandas exactly and are part of the
+tests. In total 269 tests pass.
 
 ## Run it
 

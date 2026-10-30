@@ -457,3 +457,54 @@ ROUND2 = [
 @pytest.mark.parametrize("cid, request_, expected", ROUND2, ids=[x[0] for x in ROUND2])
 def test_stress_round2(body, cid, request_, expected):
     test_stress(body, cid, request_, expected)
+
+
+# --- round 3: the two requests from the audit (both were silently wrong before the fixes) -------
+
+def a01():
+    q = pts()
+    af = q[(q.age >= 18) & has("I48")]
+    bb = oracle.with_active_medication("C07")
+    sbp = oracle.latest_value("8480-6")
+    out = {}
+    for h, x in by(af, "data_holder", HOSPITALS).items():
+        k = x.patient_id.isin(bb).sum()
+        w = x[x.patient_id.isin(sbp.index)]
+        out[(h,)] = [c(len(x)), p(k, len(x)), m(list(sbp[w.patient_id]))]
+    return out
+
+
+def a02():
+    e = stays()
+    e = e[(e.type == "inpatient") & e.primary_icd10.str.match(r"^(J18|N39)")].copy()
+    e["los"] = (pd.to_datetime(e.end_date) - pd.to_datetime(e.start_date)).dt.days
+    spec = [("0-64", 0, 64), ("65-79", 65, 79), ("80+", 80, 200)]
+    out = {}
+    for label, x in bands(e, spec).items():
+        out[(label,)] = [c(len(x)), "suppressed" if x.patient_id.nunique() < 10 else m(list(x.los))]
+    return out
+
+
+ROUND3 = [
+    ("A-01", req("For adults with atrial fibrillation, per hospital: how many are there, what share takes a beta "
+                 "blocker, and what is their mean systolic blood pressure?",
+                 ["Adult = aged 18 or older on 31 December 2025.",
+                  "Atrial fibrillation = any condition with an ICD-10 code starting with I48.",
+                  "Beta blocker = ATC code starting with C07.",
+                  "A medication is active on 31 December 2025 if start_date is on or before that day and end_date "
+                  "is empty or on or after that day.",
+                  "Use the latest systolic blood pressure (LOINC 8480-6) per patient.",
+                  "Report per data holder: adults with atrial fibrillation, the share of them with an active beta "
+                  "blocker in %, and their mean systolic blood pressure, one decimal."]), a01),
+    ("A-02", req("How many inpatient stays with a main diagnosis of pneumonia or urinary tract infection started in "
+                 "2023-2025, by the patient's age band, and how long were they?",
+                 ["Inpatient stay = encounter with type 'inpatient'.", "Count stays (not patients).",
+                  "Age bands on 31 December 2025: 0-64, 65-79, 80+.",
+                  "Report per age band: inpatient stays with primary_icd10 starting with J18 or N39, and their mean "
+                  "length of stay in days, one decimal."]), a02),
+]
+
+
+@pytest.mark.parametrize("cid, request_, expected", ROUND3, ids=[x[0] for x in ROUND3])
+def test_audit_requests(body, cid, request_, expected):
+    test_stress(body, cid, request_, expected)

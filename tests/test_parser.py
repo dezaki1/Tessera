@@ -159,3 +159,42 @@ def test_blood_pressure_is_a_measurement_and_high_blood_pressure_a_condition(par
     count, mean = parsed.statistics.metrics
     assert crit(count, "condition")[0].icd10_prefixes[0] == "I10"
     assert mean.value.loinc == "8480-6"
+
+
+def test_comma_and_separates_numbers(parser):
+    parsed = parser.parse(req(["Report per region: adults with asthma, the share of them with an active "
+                               "inhaler in %, and their mean BMI."]))
+    kinds = [m.kind for m in parsed.statistics.metrics if m.visible]
+    assert kinds == ["count", "percentage", "mean"]
+
+
+def test_condition_only_in_question_is_flagged_not_guessed(parser):
+    parsed = parser.parse(req(["Report per region: adults."], question="How many adults with asthma live in each region?"))
+    (metric,) = parsed.statistics.metrics
+    assert not crit(metric, "condition"), "a diagnosis named only in the question must not be added silently"
+    assert any("asthma" in u and "not applied" in u for u in parsed.unresolved)
+
+
+def test_defined_concept_from_question_is_still_applied(parser):
+    parsed = parser.parse(json.loads((REQUESTS / "R08.json").read_text()))  # breast cancer is defined
+    assert parsed.unresolved == []
+    assert crit(parsed.statistics.metrics[0], "condition")[0].icd10_prefixes == ["C50"]
+
+
+def test_population_named_once_applies_to_every_mean(parser):
+    parsed = parser.parse(req(["Report per region: mean BMI and mean HbA1c of adults with diabetes."]))
+    bmi, hba1c = parsed.statistics.metrics
+    assert bmi.value.loinc == "39156-5" and hba1c.value.loinc == "4548-4"
+    for metric in (bmi, hba1c):
+        assert crit(metric, "age")[0].min == 18 and crit(metric, "condition")
+    assert parsed.unresolved == []
+
+
+def test_mean_without_any_population_is_flagged(parser):
+    parsed = parser.parse(req(["Report per region: mean BMI."]))
+    assert parsed.statistics is None and any("not stated" in u for u in parsed.unresolved)
+
+
+def test_phrase_asking_for_two_numbers_is_flagged(parser):
+    parsed = parser.parse(req(["Report per region: adults with asthma and their mean BMI or average HbA1c."]))
+    assert any("more than one number" in u for u in parsed.unresolved)
