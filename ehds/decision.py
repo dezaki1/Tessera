@@ -207,7 +207,8 @@ ACTIVITIES = {
              r"weapons?|firearms?|pistols?|rifles?|guns?|ammunition|psychoactive|recreational (?:drugs?|compounds?)|"
              r"narcotics?)\b",
              r"\b(?:design\w*|develop\w*|produc\w+|sell\w*|reach|market\w*|launch\w*|flavou?r\w*|find our|"
-             r"customers?|players?|brand|creat\w+|build\w*|formulat\w+|position\w*|aimed at|user base|tasting)\b"),
+             r"customers?|players?|brand|creat\w+|build\w*|formulat\w+|position\w*|aimed at|user base|tasting|"
+             r"tun(?:e|es|ed|ing)|releases?|maximi[sz]\w*|engag\w*|play ?time|in-app|spend|segments?|sponsor\w*)\b"),
         ),
         r"\b(?:cessation|quit\w*|stop smoking|nicotine replacement|harms? of|addiction treatment|prevent\w*|"
         r"tobacco control|public health|epidemiolog\w+)\b",
@@ -320,7 +321,8 @@ def _with_activities(rules: list[ProhibitedRule]) -> list[ProhibitedRule]:
 # consumers from a prohibited practice, are not that practice, even when they name it.
 PATTERN_EXCEPTIONS = {
     "advertising or marketing": r"\bhealth[- ]promotion\b|\bsocial marketing\b|\bfree (?:national )?(?:\w+ )?"
-                                r"(?:prevention|screening|vaccination) (?:programme|program)\b",
+                                r"(?:prevention|screening|vaccination) (?:programme|program)\b|"
+                                r"\badvertising (?:bans?|restrictions?|regulations?|rules|limits)\b",
     "insurance or credit": r"\bconsumer protection\b|\bcoverage gaps?\b",
 }
 

@@ -159,24 +159,36 @@ was reproduced before it was fixed (`tests/test_review3.py`), and their cases ar
   review. Secondary disclosure (below) remains a known limitation.
 
 **Blind hold-out set.** `examples/holdout3/` (10 requests with pandas answers) was written at the start of
-round 3 and nobody read or ran it until the final scoring, after all fixes. The table shows its blind score.
-After that run, one gap it exposed was fixed because it could copy the wrong patients into an SPE: a stay
-period given as exact dates (H3-06). With that fix it scores numbers 4/7. Its other misses are not fixed and
-are listed under Limitations.
+round 3 and nobody read or ran it until the final scoring, after all fixes. **Blind score: decisions 9/10,
+numbers 3/7, 0 privacy leaks.** The five misses were then fixed as general parser and purpose rules (listed
+below). Each fix has tests built on *other* requests and checked with pandas, so the second number is no
+longer a blind result:
+
+- H3-06: a stay period given as exact dates ("between 1 January 2024 and 31 December 2025") lost its end
+  date, so an SPE copied 248 patients instead of 190. Exact date ranges are now periods. As a safety net, no
+  SPE is built when any part of the request was not understood.
+- H3-09: "eGFR below 45 = latest eGFR value strictly below 45" ignored the threshold ("strictly"), and
+  "active on 31 December 2025" inside a drug definition was ignored.
+- H3-04: an activity rule written as a definition ("Currently on = prescription active on …") was not
+  understood. "Left out of the mean" restricted every count. A later "how many have an eGFR value" was
+  not counted within the first population.
+- H3-10: "Pneumonia as main diagnosis = primary_icd10 of the stay starting with J18" was not applied to the
+  counted stays, and "distinct patients with such a stay" did not refer back to them.
+- H3-01: the betting rule now also recognises tuning a release, maximising play time or spend, and sponsors.
 
 | Metric | Official (`requests/`) | Jury-style (`examples/jury/`) | Verifier (`examples/verifier/`) | Review 3 (`examples/review3/`) | Hold-out 3 (`examples/holdout3/`) |
 |---|---|---|---|---|---|
-| Correct decisions | 10/10 | 8/8 | 8/8 | 93/94 | 9/10 |
-| Correct numbers | 6/6 | 8/8 | 6/6 | 4/4 | 3/7 blind (4/7 after the H3-06 fix) |
+| Correct decisions | 10/10 | 8/8 | 8/8 | 93/94 | 9/10 blind, 10/10 after fixes |
+| Correct numbers | 6/6 | 8/8 | 6/6 | 4/4 | 3/7 blind, 7/7 after fixes |
 | Privacy leaks | 0 | 0 | 0 | 0 | 0 |
 | Consistency (3 runs) | 10/10 | 8/8 | 8/8 | 94/94 | 10/10 |
-| Slowest time to answer | 0.09 s | 0.06 s | 0.08 s | 0.15 s | 0.10 s |
+| Slowest time to answer | 0.09 s | 0.07 s | 0.08 s | 0.18 s | 0.10 s |
 
 ```bash
 python -m evaluation.run_eval --sets official,jury,verifier,review3,holdout3
 ```
 
-In total 508 tests pass.
+In total 512 tests pass.
 
 ## Run it
 
@@ -278,10 +290,9 @@ patient. Opted-out patients are excluded from every number, denominator and SPE 
   commercial applicant with no matching purpose is held for staff review; nobody is rejected on that basis.
 - **Purpose wording still matters.** The fail-safe now covers every applicant, but only when the purpose has
   a warning word or the applicant looks commercial. A prohibited purpose in wording the rules don't know, with
-  no warning word, is still approved. Hold-out request H3-01 shows this: an association asked, for an online-casino
-  sponsor, how many people with depression there are in order to maximise play time and in-app spend in betting
-  mechanics. It was approved with numbers released, because the rules know "betting" only next to words like
-  "develop" or "customers", not "tuning" or "release".
+  no warning word, is still approved. Hold-out request H3-01 showed this before it was fixed: an association
+  working for an online-casino sponsor was approved with numbers, because the rule knew "betting" only next to
+  words like "develop", not "tuning the next release".
 - **Rule-only purpose classification.** It catches the sample cases and the tested variants, but new wording
   can slip past it. Weak signals are flagged to staff rather than decided.
 - **Rule parser coverage.** It covers counts, percentages and means (of the latest measurement, age or
@@ -298,18 +309,10 @@ patient. Opted-out patients are excluded from every number, denominator and SPE 
   characters per value, 10 s). Anyone with the SPE link can still page through the pseudonymised rows with
   OFFSET. A real SPE would tie access to the permit holder and add an output checking step for results
   such as model weights.
-- **Parser gaps found by the hold-out set (not fixed, reported as found).**
-  - H3-06 (fixed after the blind run): an SPE whose stays had a date range ("between 1 January 2024 and
-    31 December 2025") ignored the range, so the cohort had 248 patients instead of 190. Exact date ranges are
-    now applied as periods. As a safety net, no SPE is built when any part of the request was not understood.
-    Tests use other requests and check the cohort size against pandas.
-  - H3-09: "eGFR below 45 = latest eGFR value strictly below 45" was not applied, so the share was 100%.
-  - H3-04: the definition "Currently on = prescription active on 31 December 2025…" was not understood. The
-    SGLT2 filter was dropped and the numbers were released with a warning.
-  - H3-10: "Pneumonia as main diagnosis = primary_icd10 of the stay starting with J18" and a 2023–2025 period
-    were not applied. The numbers were released with a warning.
-
-  None of these released a cell that breaks the small-cell rule, but the numbers are wrong.
+- **The hold-out set showed how the parser fails on new wording.** Its 5 blind misses are fixed (see above),
+  but they show that new wording can still give wrong numbers. When the parser notices something it did not
+  understand, it warns or holds the request. When it doesn't notice, the wrong numbers are released. No miss
+  broke the small-cell rule.
 
 ## How we used IBM Bob
 

@@ -230,3 +230,82 @@ def test_no_spe_when_part_of_the_request_is_not_understood(body):
     request["definitions"] = request["definitions"] + ["Only patients seen on 15 March 2024 or later."]
     r = body.process(request)
     assert r["status"] == "needs_review" and r["spe"] is None
+
+
+# --- hold-out findings H3-01, H3-04, H3-09, H3-10 (tests use other requests) ----------------------
+
+import pandas as pd
+
+
+def _people():
+    p = pd.read_csv(ROOT / "data" / "patients.csv")
+    p = p[p["opted_out"].astype(str).str.lower() != "true"].copy()
+    p["age"] = 2025 - pd.to_datetime(p["birth_date"]).dt.year
+    return p
+
+
+def _stat(body, rid, definitions, question="q"):
+    return body.process({**BASE, "id": rid, "question": question, "definitions": definitions})
+
+
+def test_stays_with_a_main_diagnosis_concept_and_distinct_patients_with_such_a_stay(body):
+    r = _stat(body, "HS1", [
+        "Inpatient stay = encounter with type 'inpatient' and a start_date from 1 January 2024 to 31 December 2025.",
+        "Heart attack as main diagnosis = primary_icd10 of the stay starting with I21.",
+        "Report per hospital: number of inpatient stays with heart attack as main diagnosis and the number of "
+        "distinct patients with such a stay."], question="Heart attack stays per hospital?")
+    p = _people()
+    e = pd.read_csv(ROOT / "data" / "encounters.csv").merge(p[["patient_id"]], on="patient_id")
+    e = e[(e["type"] == "inpatient") & e["primary_icd10"].fillna("").str.startswith("I21")
+          & (e["start_date"] >= "2024-01-01") & (e["start_date"] <= "2025-12-31")]
+    for hospital, values in r["answer"].items():
+        stays = e[e["data_holder"] == hospital]
+        n_stays, n_patients = len(stays), stays["patient_id"].nunique()
+        # Stays are shown only when they come from 10 or more patients (stricter than the task rule).
+        shown = [n_stays if n_stays >= 10 and n_patients >= 10 else "<10", n_patients if n_patients >= 10 else "<10"]
+        assert list(values.values()) == shown, (hospital, values, n_stays, n_patients)
+
+
+def test_threshold_strictly_below_and_active_in_a_definition(body):
+    r = _stat(body, "HS2", [
+        "Diabetes = any condition with an ICD-10 code starting with E11.",
+        "Use the latest HbA1c (LOINC 4548-4) per patient.",
+        "HbA1c below 7 = latest HbA1c value strictly below 7.",
+        "Metformin = ATC code starting with A10BA, active on 31 December 2025 (start_date on or before that day and "
+        "end_date empty or on or after that day).",
+        "Report per region: patients with diabetes, % with HbA1c below 7 and % on metformin."])
+    metrics = {m["name"]: m for m in r["staff"]["parse"]["statistics"]["metrics"]}
+    crits = [c for m in metrics.values() for c in m["criteria"]]
+    assert any(c["kind"] == "observation" and c["comparator"] == "<" and float(c["threshold"]) == 7 for c in crits)
+    assert all(c["active"] for c in crits if c["kind"] == "medication")
+
+
+def test_activity_rule_given_as_a_definition_and_later_how_many(body):
+    r = _stat(body, "HS3", [
+        "Adult = aged 18 or older on 31 December 2025.",
+        "Metformin = ATC code starting with A10BA.",
+        "Currently on = prescription active on 31 December 2025: start_date on or before that day and end_date empty "
+        "or on or after that day.",
+        "Use the latest HbA1c (LOINC 4548-4) per patient; patients without an HbA1c are left out of the mean.",
+        "Report per region: adults on metformin, how many have an HbA1c value and their mean HbA1c."])
+    assert r["staff"]["parse"]["unresolved"] == []
+    p = _people()
+    m = pd.read_csv(ROOT / "data" / "medications.csv")
+    m = m[m["atc"].str.startswith("A10BA") & (m["start_date"] <= "2025-12-31")
+          & (m["end_date"].isna() | (m["end_date"] >= "2025-12-31"))]
+    o = pd.read_csv(ROOT / "data" / "observations.csv")
+    on = p[(p["age"] >= 18) & p["patient_id"].isin(m["patient_id"])]
+    with_value = on[on["patient_id"].isin(o.loc[o["loinc"] == "4548-4", "patient_id"])]
+    for region, values in r["answer"].items():
+        n_on = int((on["region"] == region).sum())
+        n_val = int((with_value["region"] == region).sum())
+        first, second = list(values.values())[:2]
+        assert first == (n_on if n_on >= 10 else "<10") and second == (n_val if n_val >= 10 else "<10"), region
+
+
+def test_casino_sponsored_engagement_tuning_is_rejected_and_ban_research_is_not():
+    rejected = decide({**BASE, "purpose": "A betting company sponsors our lab. We want to know which groups stay "
+                                          "engaged longest so the next release of our slot game can maximise spend."})
+    allowed = decide({**BASE, "purpose": "We evaluate how gambling advertising bans changed gambling-related "
+                                         "hospital admissions."})
+    assert rejected.decision == "REJECT" and allowed.decision != "REJECT"

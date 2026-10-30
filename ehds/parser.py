@@ -371,8 +371,12 @@ class _Context:
                 self.bands_invalid = True  # never fall back to bands the applicant did not ask for
                 raise
             return
+        # "Currently on = prescription active on 31 December 2025: start_date on or before ..." states the
+        # activity rule as a definition; it names no drug.
+        rule_as_definition = "=" in s and re.search(r"\bactive\b", s.partition("=")[2], I) and \
+            re.search(r"start[_ ]date|end[_ ]date", s, I) and not re.search(r"\b[A-Z]\d{2}[A-Z]{0,2}\d{0,2}\b", s)
         if re.search(r"\bactive\b", s, I) and re.search(r"\b(medications?|prescriptions?|drugs?)\b", s, I) \
-                and "=" not in s:
+                and ("=" not in s or rule_as_definition):
             if re.search(r"start[_ ]date", s, I):
                 self.active_rule = "start_and_end"
             elif re.search(r"end[_ ]date\s+is\s+empty|no end[_ ]date|without an? end[_ ]date", s, I):
@@ -461,7 +465,9 @@ class _Context:
                 name=name_atom.text, definition=s, kind="measurement", loinc=loinc,
                 keys=frozenset({f"measurement:{loinc}"})))
         self.result.assumptions.append(f"The latest value per patient is used for LOINC {loinc}.")
-        if re.search(r"\b(left out|excluded|exclude|leave out|omitted|not counted|are dropped)\b", s, I):
+        # "left out" restricts every number; "left out of the mean" only the mean, which needs a value anyway.
+        if re.search(r"\b(left out|excluded|exclude|leave out|omitted|not counted|are dropped)\b", s, I) and \
+                not re.search(r"\b(?:of|from) the (?:mean|average)s?\b", s, I):
             self.required_measurements.append(loinc)
 
     def _parse_count_rule(self, s: str) -> None:
@@ -553,7 +559,8 @@ class _Context:
                 crit = ConditionCriterion(icd10_prefixes=codes)
                 return Concept(name, sentence, "condition", criteria=[crit], keys=frozenset({f"condition:{','.join(codes)}"}))
             if a.kind == "medication":
-                med = MedicationCriterion(atc_prefixes=codes)
+                # "SGLT2 inhibitor = ATC A10BK, active on 31 December 2025 (...)": the definition says active.
+                med = MedicationCriterion(atc_prefixes=codes, active=bool(re.search(r"\bactive\b", body, I)))
                 return Concept(name, sentence, "medication", med=med, keys=frozenset({f"medication:{','.join(codes)}"}))
             if a.kind == "measurement" and self._threshold(body[a.end:]) == (None, None):
                 return Concept(name, sentence, "measurement", loinc=a.loinc, keys=frozenset({f"measurement:{a.loinc}"}))
@@ -575,6 +582,9 @@ class _Context:
         if meaning.ratio:
             return Concept(name, sentence, "ratio", ratio=meaning.ratio, keys=frozenset(meaning.keys))
         kind = "attribute" if kinds <= {"attribute"} else "condition" if kinds == {"condition"} else "composite"
+        if re.search(r"\bactive\b", body, I):  # "ATC A10BK, active on 31 December 2025 (...)"
+            meaning.criteria = [c.model_copy(update={"active": True}) if c.kind == "medication" else c
+                                for c in meaning.criteria]
         return Concept(name, sentence, kind, criteria=meaning.criteria,
                        keys=frozenset(meaning.keys | {f"concept:{name.lower()}"}))
 
@@ -653,7 +663,8 @@ class _Context:
     }
     _FILLER = re.compile(
         r"\s+|,|\(|\)|=|:|/|\b(?:codes?|starting|starts|start|beginning|begins|with|of|in|or|and|prefix(?:es)?|"
-        r"is|are|the|an?|any|category|categories|value|values|range|equal|to|coded|as)\b", I)
+        r"is|are|the|an?|any|category|categories|value|values|range|equal|to|coded|as|stay|encounter|visit|"
+        r"admission)\b", I)
 
     def _code_atoms(self, text: str) -> list[Atom]:
         atoms = []
@@ -808,7 +819,7 @@ class _Context:
                     criteria += [c.model_copy(update={"negate": neg}) for c in a.criteria]
             elif a.kind == "medication":
                 cue = ACTIVE_RE.search(window)
-                active = bool(cue) or self._default_active(a.text)
+                active = bool(cue) or a.med.active or self._default_active(a.text)
                 criteria.append(a.med.model_copy(update={"active": active, "negate": neg}))
             elif a.kind == "measurement":
                 if role == "mean" and meaning.measurement is None:
@@ -865,6 +876,33 @@ class _Context:
             meaning.visit_head = head
         else:
             meaning.visit_head = None
+        if head is not None:
+            # "stays with pneumonia as main diagnosis", where that concept is only a main diagnosis of a stay:
+            # it narrows the stays being counted rather than asking for a second stay.
+            kept = []
+            for is_head, f, neg in visit_filters:
+                if not is_head and not neg and f.primary_icd10_prefixes and not (f.date_from or f.date_to) \
+                        and not head.primary_icd10_prefixes and (not f.types or not head.types
+                                                                 or set(f.types) <= set(head.types)):
+                    head = head.model_copy(update={"primary_icd10_prefixes": f.primary_icd10_prefixes})
+                    criteria = [EncounterCriterion(filter=head) if c.kind == "encounter" and c is criteria[0] else c
+                                for c in criteria]
+                    meaning.visit_head = head
+                    continue
+                kept.append((is_head, f, neg))
+            visit_filters = kept
+            # The same qualifier can arrive as a defined concept ("Pneumonia as main diagnosis = primary_icd10 of the
+            # stay starting with J18"), i.e. as a has-such-a-stay criterion.
+            for c in list(criteria):
+                f = getattr(c, "filter", None)
+                if c.kind == "has_encounter" and not c.negate and f.primary_icd10_prefixes and \
+                        not (f.date_from or f.date_to or f.data_holders) and not head.primary_icd10_prefixes and \
+                        (not f.types or not head.types or set(f.types) <= set(head.types)):
+                    head = head.model_copy(update={"primary_icd10_prefixes": f.primary_icd10_prefixes})
+                    criteria.remove(c)
+                    criteria = [EncounterCriterion(filter=head) if x.kind == "encounter" and i == 0 else x
+                                for i, x in enumerate(criteria)]
+                    meaning.visit_head = head
         for is_head, f, neg in visit_filters:
             if is_head:
                 continue
@@ -904,6 +942,7 @@ class _Context:
 
     _THRESHOLD = re.compile(
         r"^\s*(?:values?\s+|levels?\s+|results?\s+)?(?:of\s+|is\s+|was\s+)?"
+        r"(?:strictly\s+)?"
         r"(?P<op>above|over|greater than|more than|higher than|>=|≥|>|at least|below|under|less than|lower than|<=|≤|<|at most|equal to|=|of)?\s*"
         r"(?P<num>\d+(?:[.,]\d+)?)\s*(?:%|kg/m2|kg/m²|mmhg|mm\[hg\]|ml/min\S*)?\s*"
         r"(?P<tail>or (?:more|higher|above|over|greater|less|lower|below|under|fewer))?", I)
@@ -1088,8 +1127,19 @@ class _Context:
 
             if kind == "count":
                 criteria = meaning.criteria
-                if meaning.back_ref and prev_count is not None:
+                such = re.search(r"\bsuch (?:an? )?(?:stays?|visits?|admissions?|encounters?)\b", phrase, I)
+                if such and prev_count is not None and prev_count.unit == "encounter":
+                    # "the number of distinct patients with such a stay": patients behind the stays just counted.
+                    criteria = [HasEncounterCriterion(filter=c.filter) if c.kind == "encounter" else c
+                                for c in prev_count.criteria]
+                    meaning.unit = "patient"
+                elif meaning.back_ref and prev_count is not None:
                     criteria = _dedupe(list(prev_count.criteria) + criteria)
+                elif re.match(r"^how many\b", phrase, I) and base is not None:
+                    # "adults on X, ..., how many have an eGFR value": a later "how many" counts within the
+                    # first population named in the Report line.
+                    criteria = _dedupe(list(base.criteria) + criteria)
+                    self.result.assumptions.append(f"'{phrase}' is counted among {base.label.lower()}.")
                 if re.search(r"\bsize of (?:the )?(?:study )?(?:cohort|population)\b", phrase, I):
                     name = "cohort_size"
                 else:
@@ -1213,7 +1263,8 @@ class _Context:
                 continue
             neg = bool(NEGATION_RE.search(window))
             if a.kind == "medication":
-                crits = [a.med.model_copy(update={"active": bool(ACTIVE_RE.search(window)) or self._default_active(a.text),
+                crits = [a.med.model_copy(update={"active": bool(ACTIVE_RE.search(window)) or a.med.active
+                                                            or self._default_active(a.text),
                                                   "negate": neg})]
             else:
                 crits = [c.model_copy(update={"negate": neg}) if neg else c for c in a.criteria]
