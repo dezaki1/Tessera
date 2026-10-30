@@ -2,9 +2,49 @@
 {% block role %}Applicant view{% endblock %}
 {% block content %}
 <h1>Submit a request</h1>
-<p class="muted">Paste a request in JSON or pick one of the sample requests. The decision and, if approved, the
-anonymised answer are returned immediately.</p>
+<p class="muted">Describe what you need in your own words, or pick one of the sample requests. The decision and, if
+approved, the anonymised answer are returned immediately.</p>
 <div class="grid">
+  <div class="card">
+    <h2>Your request</h2>
+    <form method="post" action="/apply" class="apply">
+      <label>Your name <input name="name" value="{{ form.name or '' }}" placeholder="Dr. Anna Huber"></label>
+      <label>Organisation <input name="organisation" required value="{{ form.organisation or '' }}"
+             placeholder="Medical University, Department of Orthopaedics"></label>
+
+      <fieldset>
+        <legend>What do you need?</legend>
+        <label class="choice"><input type="radio" name="kind" value="statistics"
+               {% if form.kind != 'records' %}checked{% endif %}> Anonymised statistics
+          <span class="muted small">(counts, shares, means; answered right away)</span></label>
+        <label class="choice"><input type="radio" name="kind" value="records"
+               {% if form.kind == 'records' %}checked{% endif %}> Pseudonymised records in a secure environment
+          <span class="muted small">(explain in the purpose why statistics are not enough)</span></label>
+      </fieldset>
+
+      <label>Purpose <span class="muted small">What will the data be used for, and by whom?</span>
+        <textarea name="purpose" required rows="3"
+          placeholder="We study hip fractures in older patients to plan rehabilitation capacity.">{{ form.purpose or '' }}</textarea></label>
+      <label>Question <span class="muted small">The question you want answered.</span>
+        <textarea name="question" required rows="2"
+          placeholder="How many inpatient stays with a femur fracture started in 2025, by hospital?">{{ form.question or '' }}</textarea></label>
+      <label>Definitions <span class="muted small">One per line: what each term means, then a "Report per …:" line
+        listing the numbers you need.</span>
+        <textarea name="definitions" rows="5"
+          placeholder="Inpatient stay = encounter with type 'inpatient'.&#10;Count stays (not patients) whose start_date is in 2025.&#10;Report per hospital: inpatient stays with a main diagnosis (primary_icd10) starting with S72.">{{ form.definitions or '' }}</textarea></label>
+      <p><button>Submit request</button></p>
+      {% if form_error %}<div class="alert">{{ form_error }}</div>{% endif %}
+    </form>
+
+    <details {% if json_open %}open{% endif %}>
+      <summary class="small">Advanced: paste a request as JSON</summary>
+      <form method="post" action="/submit">
+        <textarea name="request_json" spellcheck="false">{{ template }}</textarea>
+        <p><button class="secondary">Submit JSON</button></p>
+      </form>
+      {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+    </details>
+  </div>
   <div class="card">
     <h2>Sample requests</h2>
     <table>
@@ -14,13 +54,16 @@ anonymised answer are returned immediately.</p>
       {% endfor %}
     </table>
   </div>
-  <div class="card">
-    <h2>Your own request</h2>
-    <form method="post" action="/submit">
-      <textarea name="request_json" spellcheck="false">{{ template }}</textarea>
-      <p><button>Submit request</button></p>
-    </form>
-    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
-  </div>
 </div>
+<style>
+  .apply label { display:block; margin:0 0 12px; font-weight:600; font-size:14px; }
+  .apply label .muted { font-weight:400; }
+  .apply input[type=text], .apply input:not([type]), .apply textarea { display:block; width:100%; margin-top:4px;
+    padding:8px; border:1px solid var(--line); border-radius:6px; font:14px inherit; font-family:inherit; }
+  .apply textarea { min-height:0; }
+  .apply fieldset { border:1px solid var(--line); border-radius:6px; margin:0 0 12px; padding:8px 12px; }
+  .apply legend { font-weight:600; font-size:14px; padding:0 4px; }
+  .apply label.choice { font-weight:400; margin:6px 0; }
+  details { margin-top:8px; } summary { cursor:pointer; color:var(--accent); }
+</style>
 {% endblock %}

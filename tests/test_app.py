@@ -54,3 +54,39 @@ def test_own_request_with_new_grouping(client):
     r = client.post("/submit", data=form, follow_redirects=True)
     assert r.status_code == 200 and "Klinikum Nord" in r.text
     assert client.post("/submit", data={"request_json": "not json"}).status_code == 200
+
+
+def test_applicant_form_gives_the_same_result_as_the_json_request(tmp_path, store):
+    """The form only builds the JSON request; decision and numbers must be identical."""
+    import json as _json
+    from pathlib import Path as _Path
+    from ehds.pipeline import AccessBody
+    from app.main import create_app
+    from fastapi.testclient import TestClient as _Client
+    r08 = _json.loads((_Path(__file__).resolve().parent.parent / "requests" / "R08.json").read_text())
+    body = AccessBody(store=store, workdir=tmp_path)
+    with _Client(create_app(access_body=body)) as client:
+        resp = client.post("/apply", data={
+            "name": r08["applicant"]["name"], "organisation": r08["applicant"]["organisation"], "kind": "statistics",
+            "purpose": r08["purpose"], "question": r08["question"], "definitions": "\n".join(r08["definitions"])},
+            follow_redirects=False)
+        assert resp.status_code == 303 and resp.headers["location"] == "/requests/A001"
+        via_json = client.post("/api/requests", json=r08).json()
+    via_form = body.results["A001"]
+    assert via_form["decision"] == via_json["decision"] and via_form["articles"] == via_json["articles"]
+    assert via_form["answer"] == via_json["answer"]
+
+
+def test_applicant_form_records_choice_and_missing_fields(tmp_path, store):
+    from ehds.pipeline import AccessBody
+    from app.main import create_app
+    from fastapi.testclient import TestClient as _Client
+    body = AccessBody(store=store, workdir=tmp_path)
+    with _Client(create_app(access_body=body)) as client:
+        resp = client.post("/apply", data={"organisation": "Uni", "kind": "records", "purpose": "",
+                                           "question": "q", "definitions": ""})
+        assert resp.status_code == 200 and "Please fill in: purpose" in resp.text and body.results == {}
+        resp = client.post("/apply", data={"organisation": "Medical University", "kind": "records",
+                                           "purpose": "Research on COPD.", "question": "How many?",
+                                           "definitions": "Report per region: patients."}, follow_redirects=False)
+    assert body.requests["A001"]["requested_as"] == "health data access application"

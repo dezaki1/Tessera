@@ -34,6 +34,27 @@ REQUEST_TEMPLATE = {
 }
 
 
+KINDS = {
+    "statistics": ("health data request", "anonymised statistics"),
+    "records": ("health data access application", "pseudonymised records"),
+}
+
+
+def form_to_request(request_id: str, name: str, organisation: str, kind: str, purpose: str, question: str,
+                    definitions: str) -> dict:
+    """The applicant form produces exactly the JSON request the API takes."""
+    requested_as, requested_format = KINDS.get(kind, KINDS["statistics"])
+    return {
+        "id": request_id,
+        "applicant": {"name": name.strip(), "organisation": organisation.strip()},
+        "requested_as": requested_as,
+        "requested_format": requested_format,
+        "purpose": purpose.strip(),
+        "question": question.strip(),
+        "definitions": [line.strip(" -•\t") for line in definitions.splitlines() if line.strip(" -•\t")],
+    }
+
+
 def load_samples() -> list[dict]:
     return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(SAMPLES.glob("R*.json"))]
 
@@ -93,7 +114,32 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
     # ---- Applicant pages ------------------------------------------------------------
     @app.get("/", response_class=HTMLResponse)
     def portal(request: Request, error: str | None = None):
-        return page(request, "portal.html", samples=load_samples(), error=error,
+        return page(request, "portal.html", samples=load_samples(), error=error, form={},
+                    template=json.dumps(REQUEST_TEMPLATE, indent=2, ensure_ascii=False))
+
+    def next_form_id() -> str:
+        n = 1
+        while f"A{n:03d}" in body().results or body().spe.manifest(f"A{n:03d}") is not None:
+            n += 1
+        return f"A{n:03d}"
+
+    @app.post("/apply")
+    def apply_form(request: Request, name: str = Form(""), organisation: str = Form(""),
+                   kind: str = Form("statistics"), purpose: str = Form(""), question: str = Form(""),
+                   definitions: str = Form("")):
+        form = {"name": name, "organisation": organisation, "kind": kind, "purpose": purpose,
+                "question": question, "definitions": definitions}
+        req = form_to_request(next_form_id(), **form)
+        missing = [label for label, value in (("organisation", organisation), ("purpose", purpose),
+                                              ("question", question)) if not value.strip()]
+        error = f"Please fill in: {', '.join(missing)}." if missing else None
+        if not error:
+            try:
+                stored = body().process(req)
+                return RedirectResponse(f"/requests/{stored['request_id']}", status_code=303)
+            except InvalidRequest as exc:
+                error = str(exc)
+        return page(request, "portal.html", samples=load_samples(), form=form, form_error=error,
                     template=json.dumps(REQUEST_TEMPLATE, indent=2, ensure_ascii=False))
 
     @app.post("/submit")
@@ -108,13 +154,14 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
                 req = json.loads(request_json or "")
                 assert isinstance(req, dict) and isinstance(req.get("id"), str) and req.get("purpose")
             except (ValueError, AssertionError):
-                return page(request, "portal.html", samples=load_samples(), template=request_json,
+                return page(request, "portal.html", samples=load_samples(), template=request_json, form={},
+                            json_open=True,
                             error="Please paste a JSON object with at least an 'id', a 'purpose', a 'question' and 'definitions'.")
         try:
             stored = body().process(req)
         except InvalidRequest as exc:
-            return page(request, "portal.html", samples=load_samples(), template=json.dumps(req, indent=2, ensure_ascii=False),
-                        error=str(exc))
+            return page(request, "portal.html", samples=load_samples(), form={}, json_open=True,
+                        template=json.dumps(req, indent=2, ensure_ascii=False), error=str(exc))
         return RedirectResponse(f"/requests/{stored['request_id']}", status_code=303)
 
     @app.get("/requests/{request_id}", response_class=HTMLResponse)
