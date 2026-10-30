@@ -1,0 +1,17 @@
+{
+  "id": "RF-FS-19",
+  "submitted": "2026-10-30T09:19:00+01:00",
+  "applicant": {
+    "name": "Dr. Lorenz Hable",
+    "organisation": "Alpine BioPharm, translational medicine",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Evidence generation for a planned CKD study; site selection depends on where patients are.",
+  "question": "How many patients with chronic kidney disease stage 3 (N18.3) are there per hospital?",
+  "definitions": [
+    "Chronic kidney disease stage 3 = any condition with an ICD-10 code starting with N18.3.",
+    "Report per hospital (data_holder): patients with chronic kidney disease stage 3."
+  ]
+}

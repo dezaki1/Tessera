@@ -1,0 +1,15 @@
+{
+  "id": "RP-P1-11",
+  "applicant": {
+    "organisation": "Private individual (landlord, 4 flats in Wels)"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "I rent out flats and want to know which areas have lots of sick people so I can avoid tenants coming from there.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

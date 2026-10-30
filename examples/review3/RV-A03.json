@@ -1,0 +1,18 @@
+{
+  "id": "RV-A03",
+  "submitted": "2026-10-30T09:10:00+01:00",
+  "applicant": {
+    "name": "Prof. Daniel Berger",
+    "organisation": "Institute for Public Health, regional planning group (university)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "For resource planning we need to know how breast-cancer cases are distributed across regions as a share of all cases.",
+  "question": "Of all patients with breast cancer, what percentage live in each region?",
+  "definitions": [
+    "Breast cancer = any condition with an ICD-10 code starting with C50.",
+    "Share = patients with breast cancer in the region / all patients with breast cancer x 100, one decimal.",
+    "Report per region: the share of breast-cancer patients, in %."
+  ]
+}

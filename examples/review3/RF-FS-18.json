@@ -1,0 +1,18 @@
+{
+  "id": "RF-FS-18",
+  "submitted": "2026-10-30T09:18:00+01:00",
+  "applicant": {
+    "name": "Sabine Wallner",
+    "organisation": "Austrian Heart Foundation",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We are a charity and want robust figures for our awareness campaign and for talking to politicians about funding for hypertension programmes.",
+  "question": "How many adults have hypertension in each region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Hypertension = any condition with an ICD-10 code starting with I10.",
+    "Report per region: adults with hypertension."
+  ]
+}

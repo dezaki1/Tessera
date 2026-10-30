@@ -127,7 +127,54 @@ reproduced before it was fixed:
 5. **Statistics applicants saw an internal note about the SPE cohort.** That note is gone, and a reason
    no longer says "answered" while the answer is held.
 
-In total 390 tests pass.
+**Review round 3.** Four more read-only reviewers wrote blind cases before reading the code. Every finding
+was reproduced before it was fixed (`tests/test_review3.py`), and their cases are now a scored set,
+`examples/review3/` (94 requests).
+
+- A **purpose tester** wrote 60 purposes. 15 prohibited ones were released, because the fail-safe only covered
+  commercial applicants: a tenants' committee, a football club's payroll, interest rates on loans, a sugar-free
+  beer, a pistol grip, loot boxes. 8 legitimate ones were rejected, such as a ministry's public health-promotion
+  campaign, insurance coverage research and a nursing staffing study. Now the fail-safe holds **any**
+  applicant with no citable Art. 53(1) purpose when the purpose contains a warning word (customers, fees,
+  loans, hiring, tenancy…). New activities and products were added, along with narrow exceptions. Public
+  insurers (ÖGK, AUVA), Länder and state health offices count as public bodies. Result: 59 of 60 correct; 1
+  prohibited text is held for staff instead of rejected.
+- A **fail-safe check** sent 25 legitimate requests. None is rejected. "Sponsor", "select trial sites" and "hire
+  a statistician" no longer trigger the rules. "Aggregates will not give us…" is recognised as a reason for an
+  SPE. A description in brackets ("PhD student, no company affiliation") no longer makes an applicant
+  commercial.
+- An **API tester** found 500 errors on malformed input, a race between two submissions with the same id, no
+  size limits, and SPE queries without a timeout. Now malformed requests get 422, oversized bodies get 413,
+  requests are processed one at a time, and SPE queries stop after 10 s. Functions that expose the server
+  (`duckdb_*`) or pack many rows into one value (`string_agg`, `list`) are blocked. Shown values are capped at
+  200 characters. Every refusal is logged with a reason.
+- A **privacy attacker** ran 26 attacks and found no hard-rule break: no small count, unsuppressed mean or
+  percentage, patient ID or opted-out patient was released. It found three wrong answers released as
+  `answered`, which are now held for staff:
+  - a share of a total across regions came out as 100% per region;
+  - a second Report line was dropped;
+  - a main-diagnosis filter in a counting rule was dropped.
+
+  "Patients who have opted out" used to be answered with the eligible population. It now goes to staff
+  review. Secondary disclosure (below) remains a known limitation.
+
+**Blind hold-out set.** `examples/holdout3/` (10 requests with pandas answers) was written at the start of
+round 3 and nobody read or ran it until the final scoring, after all fixes. It is reported untuned in the
+table below, and its misses are listed under Limitations.
+
+| Metric | Official (`requests/`) | Jury-style (`examples/jury/`) | Verifier (`examples/verifier/`) | Review 3 (`examples/review3/`) | Hold-out 3 (`examples/holdout3/`) |
+|---|---|---|---|---|---|
+| Correct decisions | 10/10 | 8/8 | 8/8 | 93/94 | 9/10 |
+| Correct numbers | 6/6 | 8/8 | 6/6 | 4/4 | 3/7 |
+| Privacy leaks | 0 | 0 | 0 | 0 | 0 |
+| Consistency (3 runs) | 10/10 | 8/8 | 8/8 | 94/94 | 10/10 |
+| Slowest time to answer | 0.09 s | 0.06 s | 0.08 s | 0.15 s | 0.10 s |
+
+```bash
+python -m evaluation.run_eval --sets official,jury,verifier,review3,holdout3
+```
+
+In total 505 tests pass.
 
 ## Run it
 
@@ -227,20 +274,40 @@ patient. Opted-out patients are excluded from every number, denominator and SPE 
 - **Public-body and commercial checks are heuristics.** Art. 53(2) reserves points (a)–(c) for public sector
   bodies. The app guesses from the organisation name (and phrases like "commissioned by the ministry"). A
   commercial applicant with no matching purpose is held for staff review; nobody is rejected on that basis.
-- **Purpose wording still matters.** The purpose rules plus the fail-safe stopped every prohibited text
-  tested, but a non-commercial applicant using wording the rules don't know would still be approved.
+- **Purpose wording still matters.** The fail-safe now covers every applicant, but only when the purpose has
+  a warning word or the applicant looks commercial. A prohibited purpose in wording the rules don't know, with
+  no warning word, is still approved. Hold-out request H3-01 shows this: an association asked, for an online-casino
+  sponsor, how many people with depression there are in order to maximise play time and in-app spend in betting
+  mechanics. It was approved with numbers released, because the rules know "betting" only next to words like
+  "develop" or "customers", not "tuning" or "release".
 - **Rule-only purpose classification.** It catches the sample cases and the tested variants, but new wording
   can slip past it. Weak signals are flagged to staff rather than decided.
 - **Rule parser coverage.** It covers counts, percentages and means (of the latest measurement, age or
   length of stay), grouped by region, hospital, sex, age band, visit type and year. Other groupings or
   statistics (medians, postcodes) are reported as not interpreted and go to staff review, or to the LLM
   fallback if enabled.
-- **Limited secondary suppression.** Overlapping age bands are refused, so one answer cannot be used to
-  subtract a hidden cell. A hidden small count can still sometimes be worked out across two separate
-  requests, or from a total minus a visible subgroup. A production system would add full secondary
-  suppression and track what each applicant has already received.
-- **No output checking in the SPE.** The SPE blocks every download. A real one would also have an output
-  checking step for releasing results such as model weights.
+- **No secondary suppression.** Overlapping age bands are refused, but other overlaps are not. One answer
+  can reveal a hidden cell: "patients, women and men with COPD" per region gives 12 / `<10` / 10, so the
+  hidden value is 2; complementary shares by sex work the same way. Across requests, hidden region counts can
+  be recovered exactly, and two means over cohorts that differ by one patient (age bands 18–79 and 18–81)
+  reveal that patient's BMI. Each released value follows the small-cell rule, but a production system needs
+  complementary suppression within an answer and tracking of what each applicant has already received.
+- **No output checking in the SPE.** The SPE blocks every download and caps what a query shows (200 rows, 200
+  characters per value, 10 s). Anyone with the SPE link can still page through the pseudonymised rows with
+  OFFSET. A real SPE would tie access to the permit holder and add an output checking step for results
+  such as model weights.
+- **Parser gaps found by the hold-out set (not fixed, reported as found).**
+  - H3-06: an SPE whose stay condition has a date range ("between 1 January 2024 and 31 December 2025")
+    ignored the range, so the cohort had 248 patients instead of 190. The size cross-check didn't catch it
+    because the requested count was parsed the same way. This is the most serious gap: patient-level data for
+    58 patients outside the requested cohort would be copied into the SPE.
+  - H3-09: "eGFR below 45 = latest eGFR value strictly below 45" was not applied, so the share was 100%.
+  - H3-04: the definition "Currently on = prescription active on 31 December 2025…" was not understood. The
+    SGLT2 filter was dropped and the numbers were released with a warning.
+  - H3-10: "Pneumonia as main diagnosis = primary_icd10 of the stay starting with J18" and a 2023–2025 period
+    were not applied. The numbers were released with a warning.
+
+  None of these released a cell that breaks the small-cell rule, but the numbers are wrong.
 
 ## How we used IBM Bob
 

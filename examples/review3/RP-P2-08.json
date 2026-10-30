@@ -1,0 +1,15 @@
+{
+  "id": "RP-P2-08",
+  "applicant": {
+    "organisation": "Kestrel Group"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Our mortgage desk wants to adjust loan terms (rate, maximum term) for applicants from regions with higher type 2 diabetes prevalence.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

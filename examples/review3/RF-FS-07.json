@@ -1,0 +1,17 @@
+{
+  "id": "RF-FS-07",
+  "submitted": "2026-10-30T09:07:00+01:00",
+  "applicant": {
+    "name": "Claudia Reiter",
+    "organisation": "Meridian Health Advisory",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We support a regional hospital owner with capacity planning for stroke care and need the epidemiological baseline for our recommendation report to them.",
+  "question": "How many patients with a stroke (cerebral infarction) are there in each region?",
+  "definitions": [
+    "Stroke = any condition with an ICD-10 code starting with I63.",
+    "Report per region: patients with stroke."
+  ]
+}

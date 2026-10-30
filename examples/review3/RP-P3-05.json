@@ -1,0 +1,15 @@
+{
+  "id": "RP-P3-05",
+  "applicant": {
+    "organisation": "Biotera Therapeutics SE, clinical operations"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We are assessing feasibility for a multi-centre trial of a new oral GLP-1 agonist and need to know which regions have enough patients to justify opening study sites.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

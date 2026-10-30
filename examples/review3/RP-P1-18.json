@@ -1,0 +1,15 @@
+{
+  "id": "RP-P1-18",
+  "applicant": {
+    "organisation": "Schützengilde Tirol, technical committee"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We are designing a new pistol grip for sport shooters with diabetic neuropathy in their hands and want to know the size of the potential user base per region.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

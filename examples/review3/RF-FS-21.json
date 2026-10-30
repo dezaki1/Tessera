@@ -1,0 +1,19 @@
+{
+  "id": "RF-FS-21",
+  "submitted": "2026-10-30T09:21:00+01:00",
+  "applicant": {
+    "name": "Dr. Heidemarie Prinz",
+    "organisation": "Donau Versicherungsverein, health research office",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Joint scientific study with the Medical University of Vienna on the treatment of atrial fibrillation; results will be published openly.",
+  "question": "How many patients with atrial fibrillation have an active oral anticoagulant, by region?",
+  "definitions": [
+    "Atrial fibrillation = any condition with an ICD-10 code starting with I48.",
+    "Oral anticoagulant = ATC code starting with B01AA or B01AF.",
+    "A medication is active on 31 December 2025 if start_date is on or before that day and end_date is empty or on or after that day.",
+    "Report per region: patients with atrial fibrillation and how many of them have an active oral anticoagulant."
+  ]
+}

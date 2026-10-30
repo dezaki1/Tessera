@@ -1,0 +1,17 @@
+{
+  "id": "RF-FS-03",
+  "submitted": "2026-10-30T09:03:00+01:00",
+  "applicant": {
+    "name": "Dr. Ingrid Haas",
+    "organisation": "Ministry of Social Affairs and Health, planning unit",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Capacity planning for rehabilitation after stroke in the coming legislative period.",
+  "question": "How many patients with a cerebral infarction diagnosis live in each region?",
+  "definitions": [
+    "Cerebral infarction = any condition with an ICD-10 code starting with I63.",
+    "Report per region: patients with cerebral infarction."
+  ]
+}

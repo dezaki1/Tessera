@@ -1,0 +1,17 @@
+{
+  "id": "RF-FS-16",
+  "submitted": "2026-10-30T09:16:00+01:00",
+  "applicant": {
+    "name": "Prof. Walter Zeiler",
+    "organisation": "University of Applied Sciences for Health Professions Upper Austria",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Teaching material for our advanced nursing course on stroke care, using real regional numbers.",
+  "question": "How many patients with cerebral infarction does each hospital hold?",
+  "definitions": [
+    "Cerebral infarction = any condition with an ICD-10 code starting with I63.",
+    "Report per hospital (data_holder): patients with cerebral infarction."
+  ]
+}

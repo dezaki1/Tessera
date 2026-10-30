@@ -1,0 +1,15 @@
+{
+  "id": "RP-P1-10",
+  "applicant": {
+    "organisation": "Turnverein Linz 1862 (gymnastics club)"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We'd like to charge a 'health risk' supplement on membership fees for people with diabetes, or turn them away from our gym classes, and need the numbers to justify it.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

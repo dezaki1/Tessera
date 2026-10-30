@@ -1,0 +1,18 @@
+{
+  "id": "RV-B3a",
+  "submitted": "2026-10-30T11:10:00+01:00",
+  "applicant": {
+    "name": "Dr. Hannah Moser",
+    "organisation": "Tyrol Cancer Registry, epidemiology unit (university-affiliated)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "To plan a joint screening network for the smaller federal states we need the number of breast-cancer cases there.",
+  "question": "How many patients living in Burgenland, Salzburg or Vorarlberg have breast cancer?",
+  "definitions": [
+    "Breast cancer = any condition with an ICD-10 code starting with C50.",
+    "Region = Burgenland, Salzburg or Vorarlberg.",
+    "Report the number of patients with breast cancer."
+  ]
+}

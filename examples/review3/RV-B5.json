@@ -1,0 +1,18 @@
+{
+  "id": "RV-B5",
+  "submitted": "2026-10-30T11:20:00+01:00",
+  "applicant": {
+    "name": "Prof. Maria Eder",
+    "organisation": "Medical University, department of psychiatry epidemiology",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We map the regional burden of depression in adults to plan community mental-health services.",
+  "question": "How many adults have a depression diagnosis in each region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Depression = any condition with an ICD-10 code starting with F32.",
+    "Report per region: adults with depression."
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "RF-FS-12",
+  "submitted": "2026-10-30T09:12:00+01:00",
+  "applicant": {
+    "name": "Dr. Raphael Kuntner",
+    "organisation": "Alpine BioPharm",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Feasibility work for a phase III trial: we want to know where enough people with poorly controlled diabetes live so we can select recruiting sites.",
+  "question": "How many adults with type 2 diabetes whose latest HbA1c is above 8% are there in each region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Use the latest HbA1c (LOINC 4548-4) per patient; patients without an HbA1c are left out.",
+    "Poorly controlled = latest HbA1c above 8.0 %.",
+    "Report per region: adults with type 2 diabetes and poorly controlled HbA1c."
+  ]
+}

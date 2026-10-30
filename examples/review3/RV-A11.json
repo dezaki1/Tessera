@@ -1,0 +1,18 @@
+{
+  "id": "RV-A11",
+  "submitted": "2026-10-30T09:50:00+01:00",
+  "applicant": {
+    "name": "Prof. Daniel Berger",
+    "organisation": "Institute for Public Health, regional planning group (university)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Descriptive statistics on breast-cancer cases per region for a prevention study; we also keep a line-listing for our own quality checks.",
+  "question": "How many patients have breast cancer per region, and please list each case?",
+  "definitions": [
+    "Breast cancer = any condition with an ICD-10 code starting with C50.",
+    "Report per region: patients with breast cancer.",
+    "Also report, for each patient with breast cancer: patient ID, birth date and the onset date of the diagnosis."
+  ]
+}

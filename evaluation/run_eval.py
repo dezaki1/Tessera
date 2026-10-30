@@ -144,6 +144,8 @@ SETS = {
     "official": ("Official sample requests (requests/)", ROOT / "requests"),
     "jury": ("Independent jury-style requests (examples/jury/)", ROOT / "examples" / "jury"),
     "verifier": ("Second independent verifier (examples/verifier/)", ROOT / "examples" / "verifier"),
+    "review3": ("Review round 3 reviewer cases (examples/review3/)", ROOT / "examples" / "review3"),
+    "holdout3": ("Blind hold-out set, round 3 (examples/holdout3/)", ROOT / "examples" / "holdout3"),
 }
 
 

@@ -1,0 +1,18 @@
+{
+  "id": "RV-A01",
+  "submitted": "2026-10-30T09:00:00+01:00",
+  "applicant": {
+    "name": "Dr. Hannah Moser",
+    "organisation": "Tyrol Cancer Registry, epidemiology unit (university-affiliated)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We prepare the national breast-cancer surveillance report and need the regional distribution together with the countrywide total to validate coverage.",
+  "question": "How many patients have breast cancer in total, and how many in each region?",
+  "definitions": [
+    "Breast cancer = any condition with an ICD-10 code starting with C50.",
+    "Report the overall total number of patients with breast cancer.",
+    "Report per region: patients with breast cancer."
+  ]
+}

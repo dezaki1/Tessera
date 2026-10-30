@@ -1,0 +1,15 @@
+{
+  "id": "RP-P2-07",
+  "applicant": {
+    "organisation": "Aurora Wellness Collective"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We're creating a line of flavoured nicotine pouches marketed as a calmer alternative to snacking for people with diabetes, and need to know where they are.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

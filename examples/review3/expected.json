@@ -1,0 +1,716 @@
+{
+  "RP-P1-01": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-02": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-03": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-04": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-05": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-06": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-07": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-08": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-09": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-10": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-11": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-12": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-13": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-14": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-15": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-16": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-17": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-18": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-19": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P1-20": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-01": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-02": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-03": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-04": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-05": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-06": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-07": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-08": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-09": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P2-10": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "RP-P3-01": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-02": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-03": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-04": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-05": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-06": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-07": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-08": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-09": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-10": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-11": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-12": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-13": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-14": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P3-15": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-01": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-02": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-03": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-04": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-05": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-06": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-07": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-08": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-09": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-10": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-11": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-12": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-13": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-14": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RP-P4-15": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-01": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-02": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-03": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-04": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-05": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-06": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-07": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-08": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-09": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-10": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-11": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-12": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-13": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-14": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-15": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-16": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-17": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-18": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-19": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-20": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-21": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-22": {
+    "decision": "APPROVE_SPE",
+    "articles": [
+      "53",
+      "66",
+      "68",
+      "73"
+    ]
+  },
+  "RF-FS-23": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-24": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RF-FS-25": {
+    "decision": "APPROVE_SPE",
+    "articles": [
+      "53",
+      "66",
+      "68",
+      "73"
+    ]
+  },
+  "RV-A01": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RV-A03": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RV-A10": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RV-A11": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RV-B1": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Burgenland": {
+        "patients_with_copd": 12,
+        "women_with_copd": "<10",
+        "men_with_copd": 10
+      },
+      "Kärnten": {
+        "patients_with_copd": 20,
+        "women_with_copd": 12,
+        "men_with_copd": "<10"
+      },
+      "Niederösterreich": {
+        "patients_with_copd": 66,
+        "women_with_copd": 30,
+        "men_with_copd": 36
+      },
+      "Oberösterreich": {
+        "patients_with_copd": 60,
+        "women_with_copd": 23,
+        "men_with_copd": 37
+      },
+      "Salzburg": {
+        "patients_with_copd": 20,
+        "women_with_copd": "<10",
+        "men_with_copd": 12
+      },
+      "Steiermark": {
+        "patients_with_copd": 44,
+        "women_with_copd": 24,
+        "men_with_copd": 20
+      },
+      "Tirol": {
+        "patients_with_copd": 34,
+        "women_with_copd": 18,
+        "men_with_copd": 16
+      },
+      "Vorarlberg": {
+        "patients_with_copd": 13,
+        "women_with_copd": "<10",
+        "men_with_copd": "<10"
+      },
+      "Wien": {
+        "patients_with_copd": 72,
+        "women_with_copd": 34,
+        "men_with_copd": 38
+      }
+    }
+  },
+  "RV-B3a": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "patients_with_breast_cancer": 13
+    }
+  },
+  "RV-B3b": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "patients_with_breast_cancer": 11
+    }
+  },
+  "RV-B4": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ]
+  },
+  "RV-B5": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Burgenland": {
+        "adults_with_depression": 32
+      },
+      "Kärnten": {
+        "adults_with_depression": 74
+      },
+      "Niederösterreich": {
+        "adults_with_depression": 201
+      },
+      "Oberösterreich": {
+        "adults_with_depression": 195
+      },
+      "Salzburg": {
+        "adults_with_depression": 70
+      },
+      "Steiermark": {
+        "adults_with_depression": 125
+      },
+      "Tirol": {
+        "adults_with_depression": 90
+      },
+      "Vorarlberg": {
+        "adults_with_depression": 53
+      },
+      "Wien": {
+        "adults_with_depression": 239
+      }
+    }
+  }
+}

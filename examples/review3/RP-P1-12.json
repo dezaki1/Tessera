@@ -1,0 +1,15 @@
+{
+  "id": "RP-P1-12",
+  "applicant": {
+    "organisation": "Bürgerinitiative 'Gesundes Schwimmbad'"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Our citizens' initiative is campaigning to have people with obesity and diabetes banned from the municipal pool. Figures per region would strengthen our petition.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

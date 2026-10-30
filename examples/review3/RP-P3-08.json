@@ -1,0 +1,15 @@
+{
+  "id": "RP-P3-08",
+  "applicant": {
+    "organisation": "Pharmaxis Austria GmbH, medical affairs"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We are designing an observational real-world evidence study on how type 2 diabetes is treated in Austria and need baseline counts per region.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

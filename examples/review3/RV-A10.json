@@ -1,0 +1,17 @@
+{
+  "id": "RV-A10",
+  "submitted": "2026-10-30T09:45:00+01:00",
+  "applicant": {
+    "name": "Dr. Lukas Vogel",
+    "organisation": "National statistics office, health statistics unit",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "For a data-governance audit we need to quantify how many records are marked as withdrawn from reuse, by region.",
+  "question": "How many patients have opted out of data reuse, by region?",
+  "definitions": [
+    "Opted out = patients whose opted_out flag is true.",
+    "Report per region: patients who have opted out."
+  ]
+}

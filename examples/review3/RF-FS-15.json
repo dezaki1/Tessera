@@ -1,0 +1,17 @@
+{
+  "id": "RF-FS-15",
+  "submitted": "2026-10-30T09:15:00+01:00",
+  "applicant": {
+    "name": "Gabriele Maier",
+    "organisation": "Gesundheitszentrum Mödling Betriebs GmbH",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "To improve our services for the people we look after and to get a better feeling for what they need.",
+  "question": "How many patients with obesity are there by region?",
+  "definitions": [
+    "Obesity = any condition with an ICD-10 code starting with E66.",
+    "Report per region: patients with obesity."
+  ]
+}

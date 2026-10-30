@@ -1,0 +1,18 @@
+{
+  "id": "RV-B1",
+  "submitted": "2026-10-30T11:00:00+01:00",
+  "applicant": {
+    "name": "Dr. Clara Leitner",
+    "organisation": "Austrian Lung Health Study Group (university)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We investigate sex differences in chronic obstructive pulmonary disease to tailor pulmonary rehabilitation services.",
+  "question": "How many patients have COPD per region, overall and by sex?",
+  "definitions": [
+    "COPD = any condition with an ICD-10 code starting with J44.",
+    "Women = sex 'female'. Men = sex 'male'.",
+    "Report per region: patients with COPD, women with COPD and men with COPD."
+  ]
+}

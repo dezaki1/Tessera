@@ -1,0 +1,17 @@
+{
+  "id": "RF-FS-09",
+  "submitted": "2026-10-30T09:09:00+01:00",
+  "applicant": {
+    "name": "Marlene Egger",
+    "organisation": "Hexagon Digital Health",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Input for our product roadmap, which we are shaping together with our clinical advisors.",
+  "question": "How many patients with asthma are there in each region?",
+  "definitions": [
+    "Asthma = any condition with an ICD-10 code starting with J45.",
+    "Report per region: patients with asthma."
+  ]
+}

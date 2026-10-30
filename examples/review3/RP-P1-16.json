@@ -1,0 +1,15 @@
+{
+  "id": "RP-P1-16",
+  "applicant": {
+    "organisation": "Hausbrauer-Verein Steiermark (homebrewers' club)"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Our club is creating a strong, sugar-free craft beer aimed at diabetics who miss drinking. We want to know where most of them live to plan our first tasting events.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

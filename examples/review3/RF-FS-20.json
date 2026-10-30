@@ -1,0 +1,19 @@
+{
+  "id": "RF-FS-20",
+  "submitted": "2026-10-30T09:20:00+01:00",
+  "applicant": {
+    "name": "Mira Tschurtschenthaler",
+    "organisation": "Trialwise CRO",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Feasibility assessment for a sponsor planning an interventional COPD study in Austria.",
+  "question": "How many patients with COPD are active on a tiotropium prescription, by region?",
+  "definitions": [
+    "COPD = any condition with an ICD-10 code starting with J44.",
+    "Tiotropium = ATC code R03BB04.",
+    "A medication is active on 31 December 2025 if start_date is on or before that day and end_date is empty or on or after that day.",
+    "Report per region: patients with COPD and an active tiotropium prescription."
+  ]
+}

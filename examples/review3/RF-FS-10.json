@@ -1,0 +1,18 @@
+{
+  "id": "RF-FS-10",
+  "submitted": "2026-10-30T09:10:00+01:00",
+  "applicant": {
+    "name": "Dr. Felix Auer",
+    "organisation": "Nordlicht Analytics",
+    "country": "DE"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We are training and testing a triage support algorithm for emergency departments and want to check how much emergency volume the three hospitals have.",
+  "question": "How many emergency visits started in 2025 per hospital?",
+  "definitions": [
+    "Emergency visit = encounter with type 'emergency'.",
+    "Count visits (not patients) whose start_date is in 2025.",
+    "Report per hospital (data_holder): emergency visits."
+  ]
+}

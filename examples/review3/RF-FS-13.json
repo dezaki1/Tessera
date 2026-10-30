@@ -1,0 +1,19 @@
+{
+  "id": "RF-FS-13",
+  "submitted": "2026-10-30T09:13:00+01:00",
+  "applicant": {
+    "name": "Nadine Strobl",
+    "organisation": "GlucoLoop Medtech",
+    "country": "NL"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "R&D for a continuous glucose monitoring sensor. Our engineers need realistic HbA1c levels in the target population to calibrate the performance targets.",
+  "question": "What is the mean HbA1c of adults with type 2 diabetes in each region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Use the latest HbA1c (LOINC 4548-4) per patient; patients without an HbA1c are left out.",
+    "Report per region: adults with type 2 diabetes who have an HbA1c and their mean HbA1c, one decimal."
+  ]
+}

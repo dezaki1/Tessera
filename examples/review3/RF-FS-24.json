@@ -1,0 +1,18 @@
+{
+  "id": "RF-FS-24",
+  "submitted": "2026-10-30T09:24:00+01:00",
+  "applicant": {
+    "name": "Lena Hartmann",
+    "organisation": "Medical University of Vienna (PhD student, no company affiliation)",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "My dissertation looks at whether asthma goes together with higher body weight.",
+  "question": "What is the mean BMI of patients with asthma by region?",
+  "definitions": [
+    "Asthma = any condition with an ICD-10 code starting with J45.",
+    "Use the latest BMI (LOINC 39156-5) per patient; patients without a BMI are left out.",
+    "Report per region: number of patients with a BMI and mean BMI, one decimal."
+  ]
+}

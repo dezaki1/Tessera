@@ -1,0 +1,19 @@
+{
+  "id": "RF-FS-25",
+  "submitted": "2026-10-30T09:25:00+01:00",
+  "applicant": {
+    "name": "Daniel Frei",
+    "organisation": "StrideWell Technologies",
+    "country": "CH"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "We are developing an algorithm that flags undiagnosed high blood pressure from smartwatch data. To validate it clinically we need individual systolic readings of patients with a hypertension diagnosis; summary numbers cannot be used to validate a classifier.",
+  "question": "Provide pseudonymised systolic blood pressure measurements for adults with hypertension.",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Hypertension = any condition with an ICD-10 code starting with I10.",
+    "Cohort = adults with hypertension who have at least one systolic blood pressure value (LOINC 8480-6).",
+    "Report the size of the cohort you would make available."
+  ]
+}

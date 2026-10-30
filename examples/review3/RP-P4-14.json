@@ -1,0 +1,15 @@
+{
+  "id": "RP-P4-14",
+  "applicant": {
+    "organisation": "Statistik Austria, labour market statistics"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "For the official statistics release on chronic illness and labour market participation we need the number of adults with type 2 diabetes per region.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

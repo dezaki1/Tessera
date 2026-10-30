@@ -1,0 +1,19 @@
+{
+  "id": "RF-FS-17",
+  "submitted": "2026-10-30T09:17:00+01:00",
+  "applicant": {
+    "name": "Dr. Anouk de Vries",
+    "organisation": "Radboud-affiliated nephrology research unit, Nijmegen",
+    "country": "NL"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Cross-country comparison of kidney function in a European research consortium funded by Horizon Europe.",
+  "question": "How many adults have an eGFR below 60 on their latest measurement, by region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Use the latest eGFR (LOINC 62238-1) per patient; patients without an eGFR are left out.",
+    "Reduced kidney function = latest eGFR below 60.",
+    "Report per region: adults with an eGFR and adults with reduced kidney function."
+  ]
+}

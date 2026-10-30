@@ -1,0 +1,18 @@
+{
+  "id": "RF-FS-01",
+  "submitted": "2026-10-30T09:01:00+01:00",
+  "applicant": {
+    "name": "Dr. Katharina Moser",
+    "organisation": "Medical University of Graz, Institute of Public Health",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Our group is writing a paper on how common high blood pressure is across the federal states, as groundwork for a grant on community screening.",
+  "question": "How many adults have hypertension in each region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Hypertension = any condition with an ICD-10 code starting with I10.",
+    "Report per region: adults with hypertension."
+  ]
+}

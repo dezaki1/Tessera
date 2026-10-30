@@ -1,0 +1,18 @@
+{
+  "id": "RF-FS-22",
+  "submitted": "2026-10-30T09:22:00+01:00",
+  "applicant": {
+    "name": "Peter Zangerl",
+    "organisation": "MediSoft Systeme",
+    "country": "AT"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "We develop hospital planning software and want to train a bed-occupancy forecasting model. Aggregates will not give us the temporal patterns we need, so we need visit-level records.",
+  "question": "Provide pseudonymised inpatient encounters from 2025 with patient ID, hospital, start date and end date.",
+  "definitions": [
+    "Inpatient stay = encounter with type 'inpatient'.",
+    "Cohort = inpatient stays whose start_date is in 2025.",
+    "Report the number of stays you would make available."
+  ]
+}

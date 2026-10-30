@@ -1,0 +1,17 @@
+{
+  "id": "RF-FS-05",
+  "submitted": "2026-10-30T09:05:00+01:00",
+  "applicant": {
+    "name": "Eva Lindqvist",
+    "organisation": "Cardiolink Medical Devices GmbH",
+    "country": "DE"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We are building a wearable patch that detects irregular heart rhythm and need to know how many people in Austria live with atrial fibrillation to design our validation study with cardiologists.",
+  "question": "How many patients have atrial fibrillation in each region?",
+  "definitions": [
+    "Atrial fibrillation = any condition with an ICD-10 code starting with I48.",
+    "Report per region: patients with atrial fibrillation."
+  ]
+}

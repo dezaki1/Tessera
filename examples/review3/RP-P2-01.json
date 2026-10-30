@@ -1,0 +1,15 @@
+{
+  "id": "RP-P2-01",
+  "applicant": {
+    "organisation": "Vital Plus Health"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We'd like to refine the monthly price of our supplementary health plans so that customers in high-diabetes regions pay a premium that reflects their expected claims.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

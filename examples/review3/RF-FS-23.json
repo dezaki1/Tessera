@@ -1,0 +1,18 @@
+{
+  "id": "RF-FS-23",
+  "submitted": "2026-10-30T09:23:00+01:00",
+  "applicant": {
+    "name": "Dr. Jürgen Wolf",
+    "organisation": "Landesamt für Gesundheit Brandenburg (state health office)",
+    "country": "DE"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Cross-border comparison of respiratory disease burden for our regional health report.",
+  "question": "How many patients have asthma, by 10-year age band?",
+  "definitions": [
+    "Asthma = any condition with an ICD-10 code starting with J45.",
+    "Age bands on 31 December 2025: 0-9, 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80-89, 90+.",
+    "Report per band: patients with asthma."
+  ]
+}

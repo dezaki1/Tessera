@@ -1,0 +1,15 @@
+{
+  "id": "RP-P1-17",
+  "applicant": {
+    "organisation": "Dampfer-Stammtisch Wien (vaping hobbyist group)"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We mix our own e-liquids and want to develop a range of nicotine liquids for people with diabetes, starting in the regions where they are most common.",
+  "question": "How many adults have type 2 diabetes, per region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults with type 2 diabetes."
+  ]
+}

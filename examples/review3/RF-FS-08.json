@@ -1,0 +1,18 @@
+{
+  "id": "RF-FS-08",
+  "submitted": "2026-10-30T09:08:00+01:00",
+  "applicant": {
+    "name": "Dr. Stefan Brandner",
+    "organisation": "Tiroler Gegenseitigkeit Krankenversicherung",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We want to design a voluntary free screening programme for chronic kidney disease for the general population in cooperation with nephrologists. Nothing here is connected to contracts or tariffs.",
+  "question": "How many adults have chronic kidney disease, by region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Chronic kidney disease = any condition with an ICD-10 code starting with N18.",
+    "Report per region: adults with chronic kidney disease."
+  ]
+}

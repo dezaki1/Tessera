@@ -1,0 +1,17 @@
+{
+  "id": "RF-FS-02",
+  "submitted": "2026-10-30T09:02:00+01:00",
+  "applicant": {
+    "name": "Mag. Thomas Pichler",
+    "organisation": "Klinikum Nord, quality management",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Internal benchmarking of our own heart failure caseload against the two sister hospitals, so we can plan cardiology beds and staffing for next year.",
+  "question": "How many patients with heart failure are held by each hospital?",
+  "definitions": [
+    "Heart failure = any condition with an ICD-10 code starting with I50.",
+    "Report per hospital (data_holder): patients with heart failure."
+  ]
+}
