@@ -52,7 +52,7 @@ patients with an emergency visit in 2024, hospital filters on stays, requests wi
 from the question), and commercial but allowed purposes. Each is checked against an independent pandas
 calculation. 35 of 39 passed at first; the parser was fixed for the other 4 and all now pass. The purpose
 check has its own adversarial set (`tests/test_purpose_robustness.py`, 100 cases, built with IBM Bob, see
-`docs/bob/`) plus indirect wordings in `tests/test_decision.py`. In total 259 tests pass.
+`docs/bob/`) plus indirect wordings in `tests/test_decision.py`. In total 261 tests pass.
 
 ## Run it
 

@@ -91,7 +91,7 @@ _MEDICATIONS: dict[str, tuple[str, ...]] = {
 _MEASUREMENTS: dict[str, str] = {
     "HbA1c|Hb A1c|HbA1C|A1c|glycated haemoglobin|glycated hemoglobin|glycosylated haemoglobin|glycosylated hemoglobin|haemoglobin A1c|hemoglobin A1c": "4548-4",
     "BMI|body mass index": "39156-5",
-    "systolic blood pressure|systolic BP|SBP|systolic pressure": "8480-6",
+    "systolic blood pressure|systolic BP|SBP|systolic pressure|blood pressure|BP": "8480-6",  # the only BP measurement in the data
     "eGFR|GFR|estimated glomerular filtration rate|glomerular filtration rate|kidney function|renal function": "62238-1",
 }
 

@@ -191,7 +191,7 @@ def _criteria_key(criteria: list) -> frozenset:
     return frozenset(c.model_dump_json() for c in criteria)
 
 
-def _slug(text: str, limit: int = 48) -> str:
+def _slug(text: str, limit: int = 60) -> str:
     s = text.lower().replace("%", " pct ").replace("+", " plus ")
     s = re.sub(r"[^a-z0-9]+", "_", s).strip("_")
     s = re.sub(r"_+", "_", s)
@@ -288,6 +288,10 @@ class _Context:
             m.group(0).lower() != "31 december 2025" for m in OTHER_DATE_RE.finditer(" ".join(self.definitions))
         ):
             r.unresolved.append("A reference date other than 31 December 2025 is mentioned; only 31 December 2025 is supported.")
+        everything = " ".join([self.question, *self.definitions])
+        if re.search(r"\b(?:includ\w*|with|also|even)\b[^.]{0,40}\bopt(?:ed)?[- ]?outs?\b", everything, I):
+            r.unresolved.append("The request asks to include patients who opted out. They are always excluded "
+                                "(Art. 71); the numbers leave them out.")
         r.concepts = {c.name: f"{c.kind}: {c.definition}" for c in self.concepts}
         try:
             r.statistics = self._statistics()

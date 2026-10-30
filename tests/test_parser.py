@@ -147,3 +147,15 @@ def test_drug_activity_default_is_recorded(parser):
     med = crit(parsed.statistics.metrics[0], "medication")[0]
     assert not med.active
     assert any("statin" in a and "ever prescribed" in a for a in parsed.assumptions)
+
+
+def test_request_to_include_opted_out_is_flagged(parser):
+    parsed = parser.parse(req(["Report per region: patients with COPD, including opted-out patients."]))
+    assert any("Art. 71" in u for u in parsed.unresolved)
+
+
+def test_blood_pressure_is_a_measurement_and_high_blood_pressure_a_condition(parser):
+    parsed = parser.parse(req(["Report per region: patients with high blood pressure and their mean blood pressure."]))
+    count, mean = parsed.statistics.metrics
+    assert crit(count, "condition")[0].icd10_prefixes[0] == "I10"
+    assert mean.value.loinc == "8480-6"
