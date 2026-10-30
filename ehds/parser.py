@@ -281,6 +281,10 @@ class _Context:
         self.count_visits = False
         self.visit_years: tuple[date | None, date | None] | None = None
         self.report: str | None = None
+        self.report_lines: list[str] = []
+        # Wordings that would give a wrong number if computed the usual way: no statistics are produced.
+        self.blocking: list[str] = []
+        self.count_rule_restrictions: list[tuple[str, set[str]]] = []
         self.result = ParsedRequest()
 
     # ---------------------------------------------------------------- driver
@@ -332,6 +336,7 @@ class _Context:
     def _classify(self, sentence: str) -> None:
         s = sentence.strip().rstrip(".")
         if re.match(r"^(report|show|give|provide|list|return|present)\b", s, I):
+            self.report_lines.append(s)
             if self.report is not None:
                 self.report += "; " + s
             else:
@@ -442,6 +447,9 @@ class _Context:
             self.result.assumptions.append(f"'{s}': patients are counted once.")
             return
         atoms = self._atoms(s)
+        restricting = [a for a in atoms if a.kind in ("primary", "condition", "medication", "measurement")]
+        if restricting:
+            self.count_rule_restrictions.append((s, {a.key for a in restricting}))
         if any(a.kind == "visit" for a in atoms) or re.search(r"\b(stays|visits|encounters|admissions)\b", s, I):
             self.count_visits = True
         years = [a.years for a in atoms if a.kind == "year"]
@@ -483,6 +491,10 @@ class _Context:
         if re.search(r"\s/\s|\bdivided by\b", body, I):
             num, den = re.split(r"\s/\s|\bdivided by\b", body, maxsplit=1, flags=I)
             den = re.sub(r"\s*(?:[×x*]\s*100|times 100|in %|as a percentage).*$", "", den, flags=I)
+            if re.search(r"\b(?:all|total|overall|countrywide|nationwide|in austria)\b", den, I) and \
+                    re.search(r"\b(?:in|per|of) (?:the|each|this|a) (?:region|hospital|group|band|year|sex)\b", num, I):
+                self.blocking.append(f"'{sentence}': a share of a total across groups is not supported, so the "
+                                     "numbers are not produced")
             return Concept(name, sentence, "ratio", ratio=(num.strip(), den.strip()), keys=frozenset({f"ratio:{name.lower()}"}))
 
         atoms = self._atoms(body)
@@ -914,6 +926,18 @@ class _Context:
             self.report = self._report_from_question()
         if self.report is None:
             raise _Unresolved("No 'Report ...' line: the numbers to produce are not stated.")
+        report_keys = {a.key for a in self._atoms(self.report)}
+        for sentence, keys in self.count_rule_restrictions:
+            if not keys <= report_keys:
+                self.blocking.append(f"'{sentence}': the counting rule also restricts which records count, and the "
+                                     "Report line does not repeat it, so the numbers are not produced")
+        if self.blocking:
+            raise _Unresolved("; ".join(dict.fromkeys(self.blocking)))
+        headers = {re.sub(r"^(report|show|give|provide|list|return|present)\b\s*", "", line, flags=I).partition(":")[0]
+                   .strip().lower() if ":" in line else "" for line in self.report_lines}
+        if len(headers) > 1:
+            raise _Unresolved("several Report lines ask for different groupings (" + "; ".join(self.report_lines)
+                              + "); one answer cannot combine them, so the numbers are not produced")
         s = re.sub(r"^(report|show|give|provide|list|return|present)\b\s*", "", self.report, flags=I)
         header, sep, body = s.partition(":")
         if not sep:
