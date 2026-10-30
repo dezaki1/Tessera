@@ -194,6 +194,8 @@ In total 512 tests pass.
 
 Python 3.11+.
 
+**macOS / Linux:**
+
 ```bash
 python -m venv .venv
 ```
@@ -206,9 +208,25 @@ python -m venv .venv
 .venv/bin/uvicorn app.main:app --port 8000
 ```
 
+**Windows** (Command Prompt or PowerShell, in the repository folder):
+
+```bat
+python -m venv .venv
+```
+
+```bat
+.venv\Scripts\python -m pip install -r requirements.txt
+```
+
+```bat
+.venv\Scripts\python -m uvicorn app.main:app --port 8000
+```
+
+On Windows, replace `.venv/bin/python` with `.venv\Scripts\python` in the commands below.
+
 Open http://localhost:8000:
 
-- **Applicant portal** (`/`). Submit a sample request or paste your own JSON.
+- **Applicant portal** (`/`). Fill in the form, submit a sample request, or paste JSON under "Advanced".
 - **Staff desk** (`/staff`). "Process all sample requests", then open any request.
 - **SPE workspace** (`/spe/R05`). After R05 has been submitted: preview tables, run read-only SQL, and see the
   download button refused and logged.
