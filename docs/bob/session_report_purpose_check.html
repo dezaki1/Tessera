@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tessera — Purpose Check Robustness: Task Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px;
+         line-height: 1.6; background: #ffffff; color: #1f2328; }
+  .page { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 32px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 28px 0 10px;
+       padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+  h3 { font-size: 13px; font-weight: 600; margin: 16px 0 6px; color: #3b82d4; }
+  p  { margin-bottom: 10px; }
+  ul { padding-left: 20px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  code { font-family: "Cascadia Code", "Consolas", monospace; font-size: 12px;
+         background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 3px;
+         padding: 1px 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14px; }
+  th { background: #f7f8fa; text-align: left; padding: 7px 10px;
+       border: 1px solid #e5e7eb; font-weight: 600; }
+  td { padding: 6px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+           font-size: 11px; font-weight: 600; }
+  .pass  { background: #d1fae5; color: #065f46; }
+  .fail  { background: #fee2e2; color: #991b1b; }
+  .note  { background: #eff6ff; color: #1d4ed8; }
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+                 margin: 14px 0 20px; }
+  .metric-box  { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px;
+                 padding: 12px 14px; }
+  .metric-box .val { font-size: 22px; font-weight: 700; color: #3b82d4; }
+  .metric-box .lbl { font-size: 11px; color: #57606a; margin-top: 2px; }
+  .section-note { background: #f7f8fa; border-left: 3px solid #3b82d4;
+                  padding: 10px 14px; margin: 10px 0; font-size: 13px; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb;
+           text-align: center; font-size: 12px; color: #57606a; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Tessera — Purpose Check Robustness</h1>
+  <p class="subtitle">Task report &middot; Art. 54 prohibited-purpose hardening &middot; 30 Oct 2026</p>
+
+  <h2>Objective</h2>
+  <p>Make the Art. 54 prohibited-purpose classifier in <code>ehds/decision.py</code> robust to new and
+  indirect wording, without loosening it so far that legitimate research requests are rejected.
+  The worst failure mode (approving a prohibited purpose) was to be eliminated; the second worst
+  (rejecting a legitimate request) was equally penalised.</p>
+
+  <h2>Outcome metrics</h2>
+  <div class="metric-grid">
+    <div class="metric-box"><div class="val">100</div><div class="lbl">New robustness tests</div></div>
+    <div class="metric-box"><div class="val">100%</div><div class="lbl">Tests passing (was 84%)</div></div>
+    <div class="metric-box"><div class="val">10/10</div><div class="lbl">Eval decisions correct</div></div>
+    <div class="metric-box"><div class="val">0</div><div class="lbl">Privacy leaks</div></div>
+  </div>
+
+  <table>
+    <tr><th>Check</th><th>Before</th><th>After</th></tr>
+    <tr><td>Robustness tests passing</td>
+        <td><span class="badge fail">84 / 100</span></td>
+        <td><span class="badge pass">100 / 100</span></td></tr>
+    <tr><td>Full pytest suite</td>
+        <td><span class="badge pass">111 / 111</span></td>
+        <td><span class="badge pass">211 / 211</span></td></tr>
+    <tr><td>Evaluation &mdash; correct decisions</td>
+        <td><span class="badge pass">10 / 10</span></td>
+        <td><span class="badge pass">10 / 10</span></td></tr>
+    <tr><td>Evaluation &mdash; correct numbers</td>
+        <td><span class="badge pass">6 / 6</span></td>
+        <td><span class="badge pass">6 / 6</span></td></tr>
+    <tr><td>Evaluation &mdash; privacy leaks</td>
+        <td><span class="badge pass">0</span></td>
+        <td><span class="badge pass">0</span></td></tr>
+    <tr><td>Evaluation &mdash; consistency (3 runs)</td>
+        <td><span class="badge pass">10 / 10</span></td>
+        <td><span class="badge pass">10 / 10</span></td></tr>
+  </table>
+
+  <h2>Step 1 &mdash; Adversarial test set</h2>
+  <p>Created <code>tests/test_purpose_robustness.py</code> with 100 parametrised cases before touching any
+  rule code:</p>
+  <ul>
+    <li><strong>43 prohibited</strong> texts &mdash; varied wording, indirect phrasing, some non-native English,
+    at least 5 per Art. 54 category, including the hard cases named in the brief.</li>
+    <li><strong>57 allowed</strong> texts &mdash; legitimate purposes that resemble prohibited ones (insurance cost
+    studies, smoking-cessation research, marketing authorisation, occupational health, study-exclusion
+    criteria, etc.).</li>
+  </ul>
+  <p>Baseline run: <span class="badge fail">16 failures</span> &mdash; all in the prohibited set (missed cases);
+  no false positives.</p>
+
+  <h2>Step 2 &mdash; Root-cause analysis of the 16 failures</h2>
+  <table>
+    <tr><th>Category</th><th>Missed wording</th><th>Root cause</th></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"optimise our underwriting model &hellip; risk-based premiums"</td>
+        <td><code>underwriting</code> alone not in patterns; needed insurance keyword nearby</td></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"insurer &hellip; adjust their premiums" (110-char gap)</td>
+        <td>Pattern window was only 80 chars</td></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"price our life-insurance products"</td>
+        <td><code>price</code> preceded <code>life-insurance</code>; pattern only searched forward</td></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"adjust their policy pricing"</td>
+        <td><code>policy pricing</code> not in pattern vocabulary</td></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"excluded from our insurance products"</td>
+        <td>Exclusion from insurance handled by a different rule that required <code>based on</code></td></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"actuarial tables &hellip; policyholders pay"</td>
+        <td><code>actuarial</code> / <code>policyholders</code> not in any pattern</td></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"premium tiers for our health plan"</td>
+        <td><code>premium tiers</code> not in pattern vocabulary</td></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"high-cost claimants and price accordingly"</td>
+        <td><code>claimants</code> / <code>price accordingly</code> not covered</td></tr>
+    <tr><td>Insurance / credit</td>
+        <td>"review their loan terms"</td>
+        <td>Loan pattern only matched <code>approval|conditions|decisions</code>, not <code>terms</code></td></tr>
+    <tr><td>Employment</td>
+        <td>"job candidates to shortlist"</td>
+        <td>Pattern had <code>candidates for jobs</code> but not <code>job candidates to shortlist</code></td></tr>
+    <tr><td>Employment</td>
+        <td>"termination of employment"</td>
+        <td>Pattern matched verb <code>terminate employment</code> but not noun <code>termination of employment</code></td></tr>
+    <tr><td>Employment</td>
+        <td>"Select which workers to &hellip; dismiss"</td>
+        <td>Pattern searched dismiss&rarr;workers order; text had workers&rarr;dismiss</td></tr>
+    <tr><td>Employment</td>
+        <td>"redundancy selections"</td>
+        <td><code>redundancy</code> not in any employment pattern</td></tr>
+    <tr><td>Decisions vs. individuals</td>
+        <td>"Deny access to &hellip; individuals who have a history of &hellip;"</td>
+        <td>Pattern required <code>based on|because of</code> within 40 chars after the group word</td></tr>
+    <tr><td>Decisions vs. individuals</td>
+        <td>"decide which individuals to exclude &hellip; because of"</td>
+        <td><code>individuals</code> appeared before <code>exclude</code>; pattern searched in wrong order</td></tr>
+    <tr><td>Decisions vs. individuals</td>
+        <td>"We want to decide which individuals to exclude from the programme"</td>
+        <td>No <code>decide &hellip; exclude</code> pattern existed</td></tr>
+  </table>
+
+  <h2>Step 3 &mdash; Rule changes in <code>ehds/decision.py</code></h2>
+
+  <h3>Insurance / credit rule</h3>
+  <ul>
+    <li>Extended forward match window from 80 &rarr; 150 chars.</li>
+    <li>Added <code>underwriting</code>, <code>actuarial</code>, <code>policyholders</code>,
+        <code>claimants</code> as standalone signals near pricing vocabulary.</li>
+    <li>Added standalone <code>premium tiers/levels/adjust</code> and <code>policy pricing</code> patterns.</li>
+    <li>Added bidirectional <code>price &hellip; insurance</code> pattern (catches "price our life-insurance products").</li>
+    <li>Extended loan pattern: <code>loan (approval|conditions|decisions|terms|rates|eligibility)</code>.</li>
+    <li>Added <code>price accordingly</code> pattern.</li>
+    <li>Added <code>exclude &hellip; from (our/their) insurance/coverage/benefits/products</code> pattern.</li>
+  </ul>
+
+  <h3>Employment decisions rule</h3>
+  <ul>
+    <li>Added <code>job candidates?</code> and <code>candidates? to shortlist</code>.</li>
+    <li>Added noun form <code>terminat\w+ (?:of )?(?:their|the)? employment</code>.</li>
+    <li>Added reverse-order pattern: <code>workers/employees/staff</code> &rarr; <code>dismiss/retain</code>.</li>
+    <li>Added <code>redundancy</code> near <code>select/decision/list/shortlist</code>.</li>
+  </ul>
+
+  <h3>Harmful products rule</h3>
+  <ul>
+    <li>Added <code>apps?</code>, <code>platform\w*</code>, <code>engaging</code>, <code>design\w*</code>
+        to the commercial-context list (catches "design a more engaging betting app").</li>
+    <li>Extended exceptions: <code>tobacco control</code>, <code>control polic\w+</code>,
+        <code>epidemiolog\w+</code>, <code>prevalence</code>, <code>public health</code>,
+        <code>inform\w* (policy|prevention|guidelines)</code>.</li>
+  </ul>
+
+  <h3>Decisions against individuals rule</h3>
+  <ul>
+    <li><code>deny/refuse/blacklist</code> near person group &mdash; removed requirement for explicit health reason
+        (the action against the group is itself the signal).</li>
+    <li>Added <code>exclude &hellip; from our/their coverage/services/products/programme/benefits</code>.</li>
+    <li>Added <code>decide &hellip; to exclude/blacklist/deny</code> pattern.</li>
+    <li>Added exceptions for study-exclusion phrasing:
+        <code>from the analysis/study/cohort/sample/dataset/model</code> and
+        <code>excluded due to missing/age/criteria</code>.</li>
+  </ul>
+
+  <h2>Step 4 &mdash; Guard tests added for each loosened pattern</h2>
+  <div class="section-note">Per the task rules, every new or loosened pattern received at least one ALLOWED
+  test that resembles it but must pass.</div>
+  <table>
+    <tr><th>Pattern loosened</th><th>Guard test added to ALLOWED</th></tr>
+    <tr><td>Insurance extended window</td>
+        <td>"A statutory health insurance body needs data &hellip; to plan reimbursement policy."</td></tr>
+    <tr><td><code>actuarial</code> near pricing</td>
+        <td>"Academic study of actuarial methods for mortality forecasting, for publication."</td></tr>
+    <tr><td><code>premium</code> in clinical context</td>
+        <td>"We assess whether premium-priced biologics deliver better outcomes."</td></tr>
+    <tr><td><code>apps?/platform</code> in harmful-products context</td>
+        <td>"We are developing a smoking cessation app &hellip;" / "A non-profit develops a gambling addiction treatment platform &hellip;"</td></tr>
+    <tr><td><code>employees/staff</code> near dismiss</td>
+        <td>"Occupational health survey of hospital employees &hellip;" / "Clinicians often dismiss initial symptoms; we study diagnostic delays."</td></tr>
+    <tr><td><code>redundancy</code> pattern</td>
+        <td>"We assess data redundancy in hospital records to improve data quality."</td></tr>
+    <tr><td>Exclude from study (exception)</td>
+        <td>"We exclude patients younger than 18 from the analysis." / "Patients with missing data were excluded from the study cohort."</td></tr>
+    <tr><td>Loan in non-financial context</td>
+        <td>"This research is conducted under a data loan agreement &hellip;"</td></tr>
+  </table>
+
+  <h2>Files changed</h2>
+  <table>
+    <tr><th>File</th><th>Change</th></tr>
+    <tr><td><code>ehds/decision.py</code></td>
+        <td>Extended PROHIBITED rule patterns as described above. No changes to decision order,
+        article lists, reason texts, or ALLOWED_PURPOSES.</td></tr>
+    <tr><td><code>tests/test_purpose_robustness.py</code></td>
+        <td>New file: 43 prohibited + 57 allowed parametrised tests (100 total).</td></tr>
+    <tr><td><code>README.md</code></td>
+        <td>New "Purpose check" section: categories, detection method, exceptions, test count,
+        known blind spots.</td></tr>
+  </table>
+
+  <h2>Commit</h2>
+  <p>Commit <code>989c868</code> pushed to <code>main</code> on
+  <a href="https://github.com/dezaki1/Tessera">github.com/dezaki1/Tessera</a>.</p>
+
+  <h2>Known blind spots (remaining)</h2>
+  <ul>
+    <li>Purely financial language without insurance/credit vocabulary ("fiscal risk of our portfolio") may
+        slip past the insurance rule.</li>
+    <li>Novel substance brand names not in the trigger list are not caught.</li>
+    <li>Very indirect employment decisions ("help HR understand attendance patterns") are only flagged for
+        staff review, not rejected.</li>
+    <li>Art. 54(5) &mdash; activities conflicting with national ethical provisions &mdash; is not checked by rule.</li>
+  </ul>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>
