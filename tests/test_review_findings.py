@@ -88,10 +88,7 @@ def test_reidentification_gets_no_spe(body):
 
 # --- silent wrong answers (jury simulator) -------------------------------------------------
 
-@pytest.mark.parametrize("rid", [
-    pytest.param(f"J0{i}", marks=pytest.mark.xfail(strict=True, reason="'hypertensive' and a bare age sentence "
-                                                   "are not parsed yet")) if i == 5 else f"J0{i}"
-    for i in range(1, 9)])
+@pytest.mark.parametrize("rid", [f"J0{i}" for i in range(1, 9)])
 def test_jury_requests(body, rid):
     expected = json.loads((JURY / "expected.json").read_text())[rid]
     r = body.process(json.loads((JURY / f"{rid}.json").read_text()))
@@ -136,3 +133,27 @@ def test_opt_out_note_only_on_approvals(body):
     approved = body.process(json.loads((ROOT / "requests" / "R01.json").read_text()))
     assert not any("opted out" in n for n in rejected["notes"])
     assert any("Art. 71" in n for n in approved["notes"])
+
+
+@pytest.mark.parametrize("rid", ["J01", "J02", "J03", "J04", "J05", "J06", "J08"])
+def test_jury_requests_need_no_staff_review(body, rid):
+    """Ordinary sentences ('Count each person once', 'The year of a stay is ...', 'Aged 65 or over ...',
+    'Only admissions with a start_date in 2025') must not raise false alarms."""
+    r = body.process(json.loads((JURY / f"{rid}.json").read_text()) | {"id": f"NW{rid}"})
+    assert r["status"] == "answered", r["staff"]["parse"]["unresolved"]
+
+
+def test_distinct_patients_is_a_separate_number(body):
+    r = body.process(json.loads((JURY / "J08.json").read_text()) | {"id": "PV8"})
+    assert [c["kind"] for c in r["answer_table"]["columns"]] == ["count", "count"]
+    units = [m["unit"] for m in r["staff"]["parse"]["statistics"]["metrics"]]
+    assert units == ["encounter", "patient"]
+
+
+def test_malformed_age_band_does_not_crash(body):
+    from fastapi.testclient import TestClient
+    from app.main import create_app
+    with TestClient(create_app(access_body=body)) as client:
+        resp = client.post("/api/requests", json={**BASE, "id": "PV9", "definitions": [
+            "Age bands on 31 December 2025: under 0, 0-150.", "Report per band: patients."]})
+    assert resp.status_code == 200 and resp.json()["status"] == "needs_review"

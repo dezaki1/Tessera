@@ -25,6 +25,8 @@ import re
 from dataclasses import dataclass, field
 from datetime import date
 
+from pydantic import ValidationError
+
 from .spec import (
     AgeBand,
     AgeCriterion,
@@ -271,6 +273,8 @@ class _Context:
         self.active_rule: MedicationActiveRule = "start_and_end"
         self.active_rule_stated = False
         self.required_measurements: list[str] = []
+        self.global_criteria: list = []
+        self.bands_invalid = False
         self.count_visits = False
         self.visit_years: tuple[date | None, date | None] | None = None
         self.report: str | None = None
@@ -284,6 +288,8 @@ class _Context:
                 self._classify(sentence)
             except _Unresolved as exc:
                 r.unresolved.append(f"{sentence} ({exc})")
+            except (ValidationError, ValueError) as exc:  # e.g. an age band "under 0"
+                r.unresolved.append(f"{sentence} (not valid: {str(exc).splitlines()[0][:120]})")
         if OTHER_DATE_RE.search(" ".join(self.definitions)) and any(
             m.group(0).lower() != "31 december 2025" for m in OTHER_DATE_RE.finditer(" ".join(self.definitions))
         ):
@@ -297,6 +303,8 @@ class _Context:
             r.statistics = self._statistics()
         except _Unresolved as exc:
             r.unresolved.append(str(exc))
+        except (ValidationError, ValueError) as exc:
+            r.unresolved.append(f"The numbers could not be built: {str(exc).splitlines()[0][:160]}")
         if str(self.request.get("requested_as", "")).lower().find("access application") >= 0 or \
                 "record" in str(self.request.get("requested_format", "")).lower():
             try:
@@ -327,7 +335,11 @@ class _Context:
                 self.report = s
             return
         if re.match(r"^(?:the\s+)?(?:\d+[\s-]*year\s+)?age[\s-]*(?:bands?|groups?|classes?)\b", s, I):
-            self.bands = self._parse_bands(s)
+            try:
+                self.bands = self._parse_bands(s)
+            except (_Unresolved, ValidationError, ValueError):
+                self.bands_invalid = True  # never fall back to bands the applicant did not ask for
+                raise
             return
         if re.search(r"\bactive\b", s, I) and re.search(r"\b(medications?|prescriptions?|drugs?)\b", s, I) \
                 and "=" not in s:
@@ -346,6 +358,23 @@ class _Context:
             self._parse_count_rule(s)
             return
         if re.fullmatch(r"(?:round(?:ed)?|show|report)?\s*(?:to|with)?\s*(?:one|1)\s+decimal(?:\s+places?)?", s, I):
+            return
+        if re.match(r"^(?:the\s+)?year of (?:a|the|each)\s+(?:stay|visit|admission|encounter)\b", s, I) or \
+                re.search(r"\b(?:each|every)\s+(?:person|patient)\b[^.]*\bonce\b|\bcount(?:ed)?\s+(?:each\s+)?"
+                          r"(?:persons?|patients?|people)\s+once\b", s, I):
+            self.result.assumptions.append(f"'{s}' matches how the app counts (patients once; year = start_date year).")
+            return
+        atoms = [a for a in self._atoms(s) if a.kind != "year"] if "=" not in s else []
+        if atoms and all(a.kind == "attribute" for a in atoms) and len(s) < 80 and \
+                not re.match(r"^(report|show|give|provide|list|count|use)\b", s, I):
+            # "Aged 65 or over on 31 December 2025.", "Women only." - applies to every number
+            self.global_criteria += [c for a in atoms for c in a.criteria]
+            self.result.assumptions.append(f"'{s}' is applied to every number.")
+            return
+        if re.match(r"^only\b", s, I) and any(a.kind == "year" for a in self._atoms(s)):
+            # "Only admissions with a start_date in 2025."
+            self.visit_years = next(a.years for a in self._atoms(s) if a.kind == "year")
+            self.result.assumptions.append(f"'{s}': only visits starting in that period are used.")
             return
         if re.match(r"^(?:the\s+)?(?:length of (?:hospital\s+)?stay|duration of (?:the\s+)?stay|age)\b"
                     r"\s*(?:=|:|\bmeans\b|\bis\b)", s, I):
@@ -406,6 +435,9 @@ class _Context:
             self.required_measurements.append(loinc)
 
     def _parse_count_rule(self, s: str) -> None:
+        if re.search(r"\b(?:each|every)\s+(?:person|patient)\b[^.]*\bonce\b|^count\s+(?:persons?|patients?|people)\b", s, I):
+            self.result.assumptions.append(f"'{s}': patients are counted once.")
+            return
         atoms = self._atoms(s)
         if any(a.kind == "visit" for a in atoms) or re.search(r"\b(stays|visits|encounters|admissions)\b", s, I):
             self.count_visits = True
@@ -420,11 +452,23 @@ class _Context:
         names = [concept.name]
         if m := re.match(r"^(.*?)\s*\(([^)]+)\)\s*$", concept.name):
             names = [m.group(1), m.group(2)]
+        adjectives = {"ion": "ive", "ity": "e", "ia": "ic", "ma": "matic", "es": "ic"}
+        for n in list(names):  # hypertension -> hypertensive, obesity -> obese, asthma -> asthmatic
+            last = n.split()[-1].lower() if n.split() else ""
+            for ending, adj in adjectives.items():
+                if concept.kind in ("condition", "composite") and last.endswith(ending) and len(last) > 5:
+                    names.append(n[: len(n) - len(ending)] + adj)
+                    break
         concept.patterns = [name_pattern(n) for n in names if n.strip()]
         self.concepts = [c for c in self.concepts if c.name.lower() != concept.name.lower()]
         self.concepts.append(concept)
 
     def _define(self, name: str, body: str, sentence: str) -> None:
+        if re.search(r"\b(left out|excluded|exclude|leave out|omitted|not counted|are dropped)\b", body, I):
+            loincs = [a.loinc for a in self._atoms(body) if a.kind == "measurement"]
+            if loincs and re.search(r"\b(without|no|missing)\b", body, I):
+                self.required_measurements.append(loincs[0])
+                body = re.split(r"[;,]\s*(?:patients|persons|people)?\s*(?:without|with no)\b", body, maxsplit=1, flags=I)[0]
         body = _clean_phrase(body)
         if not name:
             raise _Unresolved("definition without a name")
@@ -786,6 +830,8 @@ class _Context:
                 update["primary_icd10_prefixes"], primary_codes = primary_codes, []
             if years:
                 (update["date_from"], update["date_to"]), years = years, None
+            elif self.visit_years and not (f.date_from or f.date_to):
+                update["date_from"], update["date_to"] = self.visit_years
             criteria.append(HasEncounterCriterion(filter=f.model_copy(update=update), negate=neg))
         if primary_codes:
             criteria.append(HasEncounterCriterion(filter=EncounterFilter(types=["inpatient"], primary_icd10_prefixes=primary_codes)))
@@ -896,6 +942,8 @@ class _Context:
 
     def _dimension(self, kind: str, label: str) -> Dimension:
         if kind == "age_band":
+            if self.bands_invalid:
+                raise _Unresolved("the age bands could not be read, so the numbers per band are not produced")
             if not self.bands:
                 m = re.search(r"(\d+)[\s-]*year", label + " " + self.question)
                 width = int(m.group(1)) if m else 10
@@ -908,7 +956,7 @@ class _Context:
     def _metric_phrases(self, body: str) -> list[str]:
         body = _clean_phrase(body)
         starters = (r"(?:the|mean|average|median|%|percent|percentage|share|proportion|number|count|how many|"
-                    r"their|that|this|those|of them|total|" + PATIENT_HEADS + r"|stays?|visits?|encounters?|admissions?)\b|%")
+                    r"their|that|this|those|of them|total|distinct|different|unique|" + PATIENT_HEADS + r"|stays?|visits?|encounters?|admissions?)\b|%")
         concept_heads = [c.name for c in self.concepts if c.kind in ("attribute", "composite", "ratio", "visit")]
         starter_re = re.compile(r"^\s*(?:" + starters + "".join(
             "|" + p.pattern.replace("(?<![\\w-])", "") for c in self.concepts
@@ -1054,6 +1102,7 @@ class _Context:
                                                    {d.kind for d in dims})
         for loinc in self.required_measurements:
             restrictions.append(ObservationCriterion(loinc=loinc))
+        restrictions += self.global_criteria
         all_metrics = []
         for m in metrics + hidden:
             if m.kind in ("count", "mean") and restrictions:
@@ -1148,7 +1197,7 @@ class _Context:
         if any(c.kind == "encounter" for c in criteria):
             criteria = [HasEncounterCriterion(filter=c.filter, negate=c.negate) if c.kind == "encounter" else c
                         for c in criteria]
-        restrictions = []
+        restrictions = list(self.global_criteria)
         for loinc in self.required_measurements:
             restrictions.append(ObservationCriterion(loinc=loinc))
         criteria = _dedupe(criteria + restrictions)
