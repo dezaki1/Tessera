@@ -45,6 +45,15 @@ without codes (SGLT2 inhibitor, eGFR, pneumonia), an HbA1c threshold, a region f
 the question, a different SPE cohort, and alcohol marketing. `tests/test_heldout.py` checks every released
 value against an independent pandas implementation. All 8 pass.
 
+**Stress test.** `tests/test_stress.py` sends 39 more requests written the way a juror might write them:
+"split by gender", "per Bundesland", per hospital and year, region × hospital × sex, definitions as
+"X: ICD-10 I50" or "X means …", "older than 65", "a BMI of 30 or more", mean age and length of stay,
+patients with an emergency visit in 2024, hospital filters on stays, requests with no Report line (read
+from the question), and commercial but allowed purposes. Each is checked against an independent pandas
+calculation. 35 of 39 passed at first; the parser was fixed for the other 4 and all now pass. The purpose
+check has its own adversarial set (`tests/test_purpose_robustness.py`, 100 cases, built with IBM Bob, see
+`docs/bob/`) plus indirect wordings in `tests/test_decision.py`. In total 259 tests pass.
+
 ## Run it
 
 Python 3.11+.

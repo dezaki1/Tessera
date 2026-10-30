@@ -65,6 +65,9 @@ PROHIBITED = [
             r"\breview (?:their |the )?loan\b",
             # "price accordingly" in the context of patients / claimants / diagnoses
             r"\bprice accordingly\b",
+            # customers/members whose charges are raised, without the word insurance
+            r"\b(customers?|clients?|members?|subscribers?)\b[^.]{0,120}\b(raise|increase|charge|adjust|differentiat)\w*"
+            r"\b[^.]{0,40}\b(contributions?|rates?|fees?|prices?|tariffs?)\b",
         ),
     ),
     ProhibitedRule(
@@ -84,6 +87,9 @@ PROHIBITED = [
             r"\b(workers?|employees?|staff)\b[^.]{0,60}\b(dismiss\w*|retain\w*)\b",
             # redundancy selections / decisions about the workforce
             r"\bredundan\w+\b[^.]{0,60}\b(select\w*|decisions?|list\b|shortlist\w*)\b",
+            # career decisions about staff (not "health promotion")
+            r"\b(employees?|staff|workers?|personnel)\b[^.]{0,80}(?<!health )\b(promot(?:e|ion|ions)|demot\w*|"
+            r"bonus\w*|appraisals?|performance reviews?|disciplin\w*)\b",
         ),
         exceptions=r"\boccupational (health|disease|safety)\b",
     ),
@@ -91,6 +97,9 @@ PROHIBITED = [
         "advertising or marketing",
         "Advertising and marketing are prohibited purposes (Art. 54).",
         patterns=(r"\badvertis\w*\b", r"\bmarketing (campaign|activit\w+|strateg\w+|purposes?)\b",
+                  # a seller who wants to target people ("we sell supplements and want to target gyms")
+                  r"\b(we (?:sell|distribute|market)|our (?:products?|brand|supplements?|shop|store|stores))\b[^.]{0,120}"
+                  r"\b(target\w*|reach)\b(?!\s+(?:population|group|cohort|patients for|enrolment|recruitment))",
                   r"\b(sales|promotional) (campaign|targeting|strategy)\b", r"\btarget (?:our )?(?:advertising|ads|customers)\b"),
         trigger=r"\bmarket(?:ing)?\b|\bpromot\w*\b|\bcampaign\b|\bbrand\w*\b",
         context=r"\b(our (?:client|product|brand)|products?|launch\w*|prescribers?|physicians?|sales|customers?|consumers?)\b",

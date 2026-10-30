@@ -55,3 +55,24 @@ def test_spe_needs_an_explanation():
 def test_trace_explains_each_step():
     d = decide(json.loads((ROOT / "requests" / "R09.json").read_text()))
     assert [f.outcome for f in d.trace] == ["no match", "no match", "no match", "matched"]
+
+
+@pytest.mark.parametrize("purpose", [
+    "We want to know which customers with chronic illness cost us most so we can raise their contributions next year.",
+    "Identify employees likely to take long sick leave so managers can plan who not to promote.",
+    "We sell protein supplements and want to target gyms in regions with high obesity.",
+    "Our members with diabetes should be charged higher monthly fees.",
+    "Use staff health data to decide on annual bonuses.",
+])
+def test_indirect_prohibited_wording(purpose):
+    assert decide(r(purpose)).decision == "REJECT"
+
+
+@pytest.mark.parametrize("purpose", [
+    "Workplace health promotion programme for hospital employees to reduce back pain.",
+    "A pharmaceutical company that sells insulin estimates the target population for a new clinical trial.",
+    "A statutory health insurer forecasts the total cost of diabetes care to plan next year's budget.",
+    "Study of staff burnout among nurses to improve working conditions.",
+])
+def test_indirect_allowed_wording(purpose):
+    assert decide(r(purpose)).decision == "APPROVE_STATISTICAL"
