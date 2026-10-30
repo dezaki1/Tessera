@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 import shutil
+import threading
 from pathlib import Path
 
 import duckdb
@@ -21,6 +22,13 @@ from .spec import CohortSpec
 
 SAFE_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 PATIENT_COLUMNS = ("sex", "birth_date", "age", "region", "data_holder")
+QUERY_TIMEOUT_S = 10
+MAX_SQL = 10_000
+MAX_CELL = 200        # characters per shown value: aggregating many rows into one text cell does not get them out
+# File/network access and functions that expose the server or pack many rows into one value.
+BLOCKED = re.compile(r"\b(copy|export|attach|detach|install|load|read_\w+|sniff_csv|parquet_scan|glob|httpfs|pragma\w*|"
+                     r"duckdb_\w+|string_agg|group_concat|listagg|array_agg|list|json_group_\w+|histogram|"
+                     r"current_setting|getenv)\b", re.I)
 
 
 class DownloadBlocked(PermissionError):
@@ -110,23 +118,40 @@ class SPEManager:
 
     def query(self, request_id: str, sql: str, actor: str, limit: int = 200) -> dict:
         """Analysis inside the SPE: read-only SELECT on the workspace only."""
-        if re.search(r"\b(copy|export|attach|install|load|read_csv|read_parquet|read_json|glob|httpfs|pragma)\b", sql, re.I):
-            self.audit.write("spe_query_refused", request_id, actor, sql=sql)
-            raise DownloadBlocked("File and network access are not available inside the SPE. This attempt has been logged.")
+        sql = sql or ""
+        logged = sql if len(sql) <= MAX_SQL else sql[:MAX_SQL] + "...[truncated]"
+        if not sql.strip() or len(sql) > MAX_SQL:
+            self.audit.write("spe_query_refused", request_id, actor, sql=logged,
+                             error="empty query" if not sql.strip() else f"query longer than {MAX_SQL} characters")
+            raise ValueError(f"Enter a single SELECT statement of at most {MAX_SQL} characters.")
+        blocked = BLOCKED.search(sql)
+        if blocked:
+            self.audit.write("spe_query_refused", request_id, actor, sql=logged,
+                             error=f"blocked keyword or function: {blocked.group(0)}")
+            raise DownloadBlocked(f"'{blocked.group(0)}' is not available inside the SPE (no file or network access, "
+                                  "no system functions, no packing of rows into one value). This attempt has been logged.")
         if not re.match(r"^\s*(select|with)\b", sql, re.I) or ";" in sql.strip().rstrip(";"):
-            self.audit.write("spe_query_refused", request_id, actor, sql=sql, error="not a single SELECT statement")
+            self.audit.write("spe_query_refused", request_id, actor, sql=logged, error="not a single SELECT statement")
             raise ValueError("Only a single SELECT statement can be run inside the SPE.")
         try:
             with self._connect(request_id) as con:
                 con.execute("SET enable_external_access = false")
-                cur = con.execute(sql.strip().rstrip(";"))
-                cols = [d[0] for d in cur.description]
-                rows = [[str(v) if v is not None else "" for v in r] for r in cur.fetchmany(limit)]
-        except duckdb.Error as exc:  # includes DuckDB's own refusal of file and network access
-            self.audit.write("spe_query_refused", request_id, actor, sql=sql,
-                             error=f"{type(exc).__name__}: {str(exc).splitlines()[0][:200]}")
+                timer = threading.Timer(QUERY_TIMEOUT_S, con.interrupt)
+                timer.start()
+                try:
+                    cur = con.execute(sql.strip().rstrip(";"))
+                    cols = [d[0] for d in cur.description]
+                    rows = [[(str(v) if v is not None else "")[:MAX_CELL] for v in r] for r in cur.fetchmany(limit)]
+                finally:
+                    timer.cancel()
+        except duckdb.Error as exc:  # includes DuckDB's own refusal of file and network access, and the timeout
+            error = str(exc).splitlines()[0][:200] if str(exc).strip() else "no message"
+            if isinstance(exc, duckdb.InterruptException):
+                error = f"stopped after {QUERY_TIMEOUT_S} s"
+            self.audit.write("spe_query_refused", request_id, actor, sql=logged,
+                             error=f"{type(exc).__name__}: {error}")
             raise
-        self.audit.write("spe_query", request_id, actor, sql=sql, rows_shown=len(rows))
+        self.audit.write("spe_query", request_id, actor, sql=logged, rows_shown=len(rows))
         return {"columns": cols, "rows": rows}
 
     def download(self, request_id: str, actor: str, what: str = "workspace") -> None:

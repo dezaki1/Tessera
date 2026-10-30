@@ -13,11 +13,12 @@ from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from ehds.pipeline import ROOT, AccessBody, InvalidRequestId, applicant_view
+from ehds.pipeline import ROOT, AccessBody, InvalidRequest, applicant_view
 from ehds.spe import DownloadBlocked
 
 TEMPLATES = Jinja2Templates(directory=Path(__file__).parent / "templates")
 SAMPLES = ROOT / "requests"
+MAX_BODY = 500_000
 REQUEST_TEMPLATE = {
     "id": "N01",
     "applicant": {"name": "Dr. Example", "organisation": "University hospital research group", "country": "AT"},
@@ -45,6 +46,14 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
 
     app = FastAPI(title="Tessera: EHDS Health Data Access Body", lifespan=lifespan)
 
+    @app.middleware("http")
+    async def limit_body(request: Request, call_next):
+        # A request is a few kilobytes; refuse oversized bodies before parsing them.
+        length = request.headers.get("content-length")
+        if length and length.isdigit() and int(length) > MAX_BODY:
+            return JSONResponse({"detail": f"Request body larger than {MAX_BODY // 1000} kB."}, status_code=413)
+        return await call_next(request)
+
     def body() -> AccessBody:
         return app.state.body
 
@@ -60,11 +69,9 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
     # ---- JSON API -------------------------------------------------------------------
     @app.post("/api/requests")
     def submit(request: dict) -> dict:
-        if not request.get("purpose"):
-            raise HTTPException(422, "a request needs a 'purpose'")
         try:
             return applicant_view(body().process(request))
-        except InvalidRequestId as exc:
+        except InvalidRequest as exc:
             raise HTTPException(422, str(exc))
 
     @app.get("/api/requests/{request_id}")
@@ -105,7 +112,7 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
                             error="Please paste a JSON object with at least an 'id', a 'purpose', a 'question' and 'definitions'.")
         try:
             stored = body().process(req)
-        except InvalidRequestId as exc:
+        except InvalidRequest as exc:
             return page(request, "portal.html", samples=load_samples(), template=json.dumps(req, indent=2, ensure_ascii=False),
                         error=str(exc))
         return RedirectResponse(f"/requests/{stored['request_id']}", status_code=303)

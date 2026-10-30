@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+import threading
 import time
 from pathlib import Path
 
@@ -17,8 +19,46 @@ from .terminology import build_terminology
 
 ROOT = Path(__file__).resolve().parent.parent
 
-class InvalidRequestId(ValueError):
+class InvalidRequest(ValueError):
+    """The request JSON does not have the expected shape; the API answers 422."""
+
+
+class InvalidRequestId(InvalidRequest):
     pass
+
+
+# A question about the people who opted out cannot be answered: their records are not in the store.
+# "Excluding opted-out patients" is fine (that is what always happens); anything else goes to staff.
+OPT_OUT = re.compile(r"\bopt(?:ed|s|ing)?[- ]?outs?\b", re.I)
+OPT_OUT_EXCLUDED = re.compile(r"\b(?:exclud\w*|without|except|not|remov\w*|minus)\b(?:\W+\w+){0,3}?\W+opt", re.I)
+MAX_TEXT = 20_000          # characters in purpose, question or one definition
+MAX_DEFINITIONS = 200
+
+
+def validate_request(request) -> None:
+    if not isinstance(request, dict):
+        raise InvalidRequest("A request must be a JSON object.")
+    applicant = request.get("applicant")
+    if applicant is not None and not (isinstance(applicant, dict)
+                                      and all(isinstance(v, (str, type(None))) for v in applicant.values())):
+        raise InvalidRequest("'applicant' must be an object with text fields, e.g. {\"organisation\": \"...\"}.")
+    for field in ("purpose", "question", "requested_as", "requested_format"):
+        value = request.get(field)
+        if value is not None and not isinstance(value, str):
+            raise InvalidRequest(f"'{field}' must be text.")
+        if isinstance(value, str) and len(value) > MAX_TEXT:
+            raise InvalidRequest(f"'{field}' is longer than {MAX_TEXT} characters.")
+    if not str(request.get("purpose") or "").strip():
+        raise InvalidRequest("A request needs a 'purpose'.")
+    definitions = request.get("definitions", [])
+    if not isinstance(definitions, list) or not all(isinstance(d, str) for d in definitions):
+        raise InvalidRequest("'definitions' must be a list of sentences (strings).")
+    if len(definitions) > MAX_DEFINITIONS or any(len(d) > MAX_TEXT for d in definitions):
+        raise InvalidRequest(f"At most {MAX_DEFINITIONS} definitions of up to {MAX_TEXT} characters each.")
+    texts = [v for v in (request.get("purpose"), request.get("question"), *definitions,
+                         *(applicant or {}).values()) if isinstance(v, str)]
+    if any("\ud800" <= ch <= "\udfff" for t in texts for ch in t):
+        raise InvalidRequest("The request contains invalid characters (unpaired surrogates).")
 
 
 # Fields an applicant sees. Everything else (trace, spec, SQL, flags) is staff-only.
@@ -41,6 +81,8 @@ class AccessBody:
         self.spe = SPEManager(self.engine, workdir / "spe", self.audit)
         self.results: dict[str, dict] = {}
         self.requests: dict[str, dict] = {}
+        # One request at a time: choosing a free id, building an SPE and storing the result must not interleave.
+        self._lock = threading.RLock()
 
     def free_id(self, wanted: str) -> str:
         """A new submission never replaces an earlier result or SPE: a used id gets a suffix."""
@@ -49,12 +91,20 @@ class AccessBody:
         if not taken(wanted):
             return wanted
         n = 2
-        while taken(f"{wanted}-{n}"):
+        while True:
+            suffix = f"-{n}"
+            candidate = wanted[:64 - len(suffix)] + suffix  # stays within the 64-character id limit
+            if not taken(candidate):
+                return candidate
             n += 1
-        return f"{wanted}-{n}"
 
     def process(self, request: dict, actor: str = "applicant") -> dict:
+        with self._lock:
+            return self._process(request, actor)
+
+    def _process(self, request: dict, actor: str) -> dict:
         started = time.perf_counter()
+        validate_request(request)
         wanted = request.get("id")
         if not isinstance(wanted, str) or not SAFE_ID.match(wanted):
             raise InvalidRequestId(
@@ -97,6 +147,12 @@ class AccessBody:
         if decision.decision == "REJECT":
             result["status"] = "rejected"
             notes.append("No data was queried for this request.")
+        elif self._asks_about_opt_outs(request):
+            result["status"] = "needs_review"
+            result["staff"]["flags"].append("The request asks about patients who opted out of secondary use. Their "
+                                            "data is not available (Art. 71), so nothing was queried.")
+            notes.append("Your request asks about patients who opted out of secondary use. Their data is not "
+                         "available for any request, so no numbers were produced. A staff member will contact you.")
         elif decision.hold_for_review:
             # Fail safe: a commercial applicant whose purpose matched no Art. 53(1) purpose open to it.
             result["status"] = "needs_review"
@@ -133,6 +189,15 @@ class AccessBody:
         self.results[request_id] = result
         self.requests[request_id] = request
         return result
+
+    @staticmethod
+    def _asks_about_opt_outs(request: dict) -> bool:
+        texts = [request.get("question") or "", *request.get("definitions", [])]
+        for text in texts:
+            for m in OPT_OUT.finditer(text):
+                if not OPT_OUT_EXCLUDED.search(text[max(0, m.start() - 40):m.end()]):
+                    return True
+        return False
 
     def _statistics(self, parsed: ParsedRequest, result: dict) -> None:
         notes = result["notes"]
