@@ -343,9 +343,20 @@ class _Context:
             return
         if re.fullmatch(r"(?:round(?:ed)?|show|report)?\s*(?:to|with)?\s*(?:one|1)\s+decimal(?:\s+places?)?", s, I):
             return
+        if re.match(r"^(?:the\s+)?(?:length of (?:hospital\s+)?stay|duration of (?:the\s+)?stay|age)\b"
+                    r"\s*(?:=|:|\bmeans\b|\bis\b)", s, I):
+            # Length of stay (end_date - start_date, in days) and age (2025 - birth year) are built in.
+            self.result.assumptions.append(f"'{s}' matches the built-in definition.")
+            return
         if "=" in s:
             name, body = s.split("=", 1)
             self._define(name.strip(), body.strip(), sentence)
+            return
+        # "Heart failure: ICD-10 I50", "Asthma means ...", "Statin is defined as ..."
+        m = re.match(r"^(?P<name>[^:]{1,60}?)\s*(?::|\bmeans\b|\bis defined as\b|\bare defined as\b|"
+                     r"\brefers to\b|\bdefined as\b)\s*(?P<body>.+)$", s, I)
+        if m and not re.match(r"^(?:report|show|note|please)\b", m.group("name"), I):
+            self._define(m.group("name").strip(), m.group("body").strip(), sentence)
             return
         raise _Unresolved("sentence type not recognised")
 
@@ -361,7 +372,8 @@ class _Context:
                     for lo in range(0, 90, width)] + [AgeBand(label="90+", min=90)]
         listing = REFERENCE_DATE_RE.sub("", listing)
         bands = []
-        for _, token in _split_top_level(listing.strip().rstrip("."), r",|;|\s+and\s+"):
+        # "and" separates bands only before a number: "60-79 and 80+", not "80 and over".
+        for _, token in _split_top_level(listing.strip().rstrip("."), r",|;|\s+and\s+(?=\d)"):
             t = token.strip()
             if m := re.fullmatch(r"(\d{1,3})\s*(?:-|–|to)\s*(\d{1,3})(?:\s*years?)?", t, I):
                 bands.append(AgeBand(label=f"{m.group(1)}-{m.group(2)}", min=int(m.group(1)), max=int(m.group(2))))
@@ -814,7 +826,31 @@ class _Context:
         return comparator, Decimal(m.group("num").replace(",", "."))
 
     # ------------------------------------------------------------ statistics
+    def _report_from_question(self) -> str | None:
+        """Without a Report line, read the numbers and groups from a simple question."""
+        q = re.sub(r"\s+", " ", self.question.strip().rstrip("?. "))
+        groups = r"(?:,\s*)?\s+(?P<dims>(?:by|per|in each|for each|broken down by|split by)\s+.+)$"
+        patterns = [
+            (rf"^how many (?P<what>.+?){groups}", "{what}"),
+            (rf"^what is the (?:mean|average) (?P<value>.+?) (?:of|among|in|for) (?P<what>.+?){groups}",
+             "{what} and their mean {value}"),
+            (rf"^what (?:share|proportion|percentage|fraction) of (?P<what>.+?) (?P<verb>have|has|are|is|take|takes|receive|receives|get|use|uses) "
+             rf"(?P<cond>.+?){groups}", "{what}, how many of them {verb} {cond} and that share in %"),
+        ]
+        for pattern, template in patterns:
+            m = re.match(pattern, q, I)
+            if m:
+                fields = {k: v for k, v in m.groupdict().items() if v}
+                what = re.sub(r"\s+(?:have|has|are|had|take|took)\s+", " with ", fields.get("what", ""), flags=I)
+                fields["what"] = what
+                report = f"Report {fields['dims']}: " + template.format(**fields)
+                self.result.assumptions.append(f"No Report line; numbers read from the question as: '{report}'.")
+                return report
+        return None
+
     def _report_parts(self) -> tuple[str, str]:
+        if self.report is None:
+            self.report = self._report_from_question()
         if self.report is None:
             raise _Unresolved("No 'Report ...' line: the numbers to produce are not stated.")
         s = re.sub(r"^(report|show|give|provide|list|return|present)\b\s*", "", self.report, flags=I)
