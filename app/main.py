@@ -13,7 +13,7 @@ from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from ehds.pipeline import ROOT, AccessBody, applicant_view
+from ehds.pipeline import ROOT, AccessBody, InvalidRequestId, applicant_view
 from ehds.spe import DownloadBlocked
 
 TEMPLATES = Jinja2Templates(directory=Path(__file__).parent / "templates")
@@ -60,9 +60,12 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
     # ---- JSON API -------------------------------------------------------------------
     @app.post("/api/requests")
     def submit(request: dict) -> dict:
-        if not isinstance(request.get("id"), str) or not request.get("purpose"):
-            raise HTTPException(422, "a request needs an 'id' and a 'purpose'")
-        return applicant_view(body().process(request))
+        if not request.get("purpose"):
+            raise HTTPException(422, "a request needs a 'purpose'")
+        try:
+            return applicant_view(body().process(request))
+        except InvalidRequestId as exc:
+            raise HTTPException(422, str(exc))
 
     @app.get("/api/requests/{request_id}")
     def get_request(request_id: str) -> dict:
@@ -100,8 +103,12 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
             except (ValueError, AssertionError):
                 return page(request, "portal.html", samples=load_samples(), template=request_json,
                             error="Please paste a JSON object with at least an 'id', a 'purpose', a 'question' and 'definitions'.")
-        body().process(req)
-        return RedirectResponse(f"/requests/{req['id']}", status_code=303)
+        try:
+            stored = body().process(req)
+        except InvalidRequestId as exc:
+            return page(request, "portal.html", samples=load_samples(), template=json.dumps(req, indent=2, ensure_ascii=False),
+                        error=str(exc))
+        return RedirectResponse(f"/requests/{stored['request_id']}", status_code=303)
 
     @app.get("/requests/{request_id}", response_class=HTMLResponse)
     def applicant_page(request: Request, request_id: str):
@@ -116,7 +123,8 @@ def create_app(workdir: Path | str = ROOT, access_body: AccessBody | None = None
     @app.post("/staff/run-samples")
     def run_samples():
         for req in load_samples():
-            body().process(req, actor="staff")
+            if req["id"] not in body().results:  # never re-run (and so never duplicate) a stored sample
+                body().process(req, actor="staff")
         return RedirectResponse("/staff", status_code=303)
 
     @app.get("/staff/requests/{request_id}", response_class=HTMLResponse)

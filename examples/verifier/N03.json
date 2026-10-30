@@ -1,0 +1,19 @@
+{
+  "id": "N03",
+  "submitted": "2026-10-30T10:00:00+01:00",
+  "applicant": {
+    "name": "Dr. Jana Koller",
+    "organisation": "Nephrology research unit, university hospital",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Research on kidney function in chronic kidney disease to improve follow-up care.",
+  "question": "What is the latest kidney function of patients with chronic kidney disease, by sex?",
+  "definitions": [
+    "Chronic kidney disease = any condition with an ICD-10 code starting with N18.",
+    "Kidney function = eGFR; use each patient's most recent eGFR value. Patients without an eGFR value are left out.",
+    "Low kidney function = latest eGFR below 45.",
+    "Report per sex: patients with an eGFR value, their mean latest eGFR, those with low kidney function, and the percentage with low kidney function, one decimal."
+  ]
+}

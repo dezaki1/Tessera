@@ -1,0 +1,18 @@
+{
+  "id": "N06",
+  "submitted": "2026-10-30T10:00:00+01:00",
+  "applicant": {
+    "name": "Mag. Eva Steiner",
+    "organisation": "Alpenländische Versicherung AG, actuarial department",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We will use regional diabetes rates to recalibrate the regional tariffs of our private health cover from next year.",
+  "question": "What share of adults has type 2 diabetes in each region?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Type 2 diabetes = any condition with an ICD-10 code starting with E11.",
+    "Report per region: adults, adults with type 2 diabetes and the percentage, one decimal."
+  ]
+}

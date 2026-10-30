@@ -37,6 +37,9 @@ class ProhibitedRule:
     trigger: str | None = None  # or: trigger ...
     context: str | None = None  # ... together with context
     exceptions: str | None = None  # text that cancels the match (e.g. "health promotion")
+    # Activity rules: every regex of a group must occur in the same sentence, in any order.
+    activities: tuple[tuple[str, ...], ...] = ()
+    activity_exceptions: str | None = None  # cancels an activity match in that sentence
 
 
 PROHIBITED = [
@@ -140,6 +143,75 @@ PROHIBITED = [
     ),
 ]
 
+# What the applicant would *do* with the data, in plain business language, in any word order.
+_SELLING = (r"\b(?:we sell|our (?:new |own )?(?:products?|brand|shake|supplements?|drinks?|drops|spray|app|"
+            r"margarine|mattress\w*|devices?|monitors?|inhalers?|strips|shop|stores?|pharmacy chain|gym chain|client)|"
+            r"sales|sells?|selling)\b")
+ACTIVITIES = {
+    "advertising or marketing": (
+        (
+            (r"\bads\b|\b(?:online|digital|targeted|social media|tv|print|banner|search)\s+ads?\b|\badvert\w*",),
+            (r"\b(?:billboards?|tv spots?|commercials|influencers?|direct mail|mail(?:ing)?s?\b|coupons?|"
+             r"sponsor\w*|lead lists?|sales reps?|social media push)\b",),
+            (r"\bmarketing\b",),
+            (r"\bmarket (?:our|the|their|its|a|this)\b",),
+            (r"\b(?:boost|increase|grow)\w* (?:our |their )?sales\b|\bsell (?:more|best)\b",),
+            (r"\bpromot(?:e|es|ing|ion)\b(?!\s+(?:of\s+)?(?:public\s+)?health)", _SELLING),
+            (r"\b(?:campaigns?|newsletters?|target\w*|reach|place|position\w*|push)\b", _SELLING),
+        ),
+        r"\bmarketing authori[sz]ation\b|\bpost-marketing\b|\bhealth promotion\b|\b(?:vaccination|prevention|"
+        r"awareness|screening|public health)\s+campaigns?\b|\btarget population\b|\bclinical (?:trial|study|evaluation)\b",
+    ),
+    "insurance or credit": (
+        (
+            (r"\b(?:insur\w*|health (?:plan|cover)|private cover|dental plan|policy ?holders?|underwrit\w*|"
+             r"actuar\w*|sickness fund|health fund)\b",
+             r"\b(?:premiums?|tariffs?|pric(?:e|es|ing)|surcharges?|deductibles?|(?:monthly )?fees?|loadings?|"
+             r"eligibility|renewal|terms|contracts?|cover\b|coverage|exclud\w+|refus\w+|charg\w+|"
+             r"what (?:\w+ ){0,3}pay|raise|increase|recalibrat\w*)\b"),
+            (r"\b(?:banks?|lenders?|leasing|mortgages?|loans?|credit)\b",
+             r"\b(?:approv\w+|grant\w*|decid\w+|factor\w*|terms|rates?|eligib\w*|check\w*|refus\w+|scor\w+)\b"),
+            (r"\b(?:members|customers|clients|subscribers)\b",
+             r"\b(?:surcharges?|higher (?:fees|prices|rates|premiums|deductibles)|charg\w+ (?:more|extra|higher))\b"),
+        ),
+        r"\b(?:research department|publish\w*|study on (?:the )?outcomes|disease management programme|"
+        r"forecast\w*|budget|evaluat\w+ whether)\b",
+    ),
+    "employment decisions": (
+        (
+            (r"\b(?:HR|human resources)\b",),
+            (r"\bhir(?:e|es|ing)\b",),
+            (r"\b(?:recruit\w*|staffing|job applicants?|applicants|candidates)\b",
+             r"\b(?:screen\w*|rank\w*|shortlist\w*|select\w*|reject\w*|harder|avoid\w*|filter\w*)\b"),
+            (r"\b(?:employees?|staff|workers?|team leads?|personnel)\b",
+             r"\b(?:promot(?:e|es|ing|ion)|dismiss\w*|fir(?:e|ing)|bonus\w*|appraisals?|sick leave|redundan\w+|"
+             r"contracts?)\b"),
+            (r"\bworkforce\b", r"\b(?:branch\w*|locat\w*|open\w*|hire|hiring)\b"),
+        ),
+        r"\b(?:occupational (?:health|disease|safety)|burnout|working conditions|well-?being|health promotion|"
+        r"(?:trial|study) participants|patients for (?:the|a|our) (?:trial|study)|hiring (?:of )?(?:nurses|doctors|"
+        r"physicians|health(?:care)? (?:staff|workers)))\b",
+    ),
+    "harmful products": (
+        (
+            (r"\b(?:energy drinks?|caffeine|casinos?|slot machines?|betting|gambl\w*|vap(?:e|es|ing)|e-?cig\w*|"
+             r"nicotine|tobacco|alcohol\w*|beer|spirits|liquor|weapons?|firearms?)\b",
+             r"\b(?:design\w*|develop\w*|produc\w+|sell\w*|reach|market\w*|launch\w*|flavou?r\w*|find our|"
+             r"customers?|players?|brand)\b"),
+        ),
+        r"\b(?:cessation|quit\w*|stop smoking|nicotine replacement|harms? of|addiction treatment|prevent\w*|"
+        r"tobacco control|public health|epidemiolog\w+)\b",
+    ),
+    "decisions against individuals": (
+        (
+            (r"\b(?:refus\w+|deny\w*|avoid\w*|reject\w*|declin\w+|exclud\w+|turn away)\b",
+             r"\b(?:rent\w*|flats?|apartments?|tenants?|memberships?|members|customers?|applicants?|service)\b"),
+        ),
+        r"\b(?:avoid\w* (?:falls|admissions|readmissions|complications|strokes|harm)|exclusion criteria|"
+        r"from the (?:analysis|study|cohort))\b",
+    ),
+}
+
 REIDENTIFICATION = re.compile(
     r"\b(match\w*|link\w*|combine\w*)\b[^.]{0,60}\b(with|to|against)\b[^.]{0,30}\b(our|their|own|employee|customer|"
     r"client|member)s?\b[^.]{0,20}\b(lists?|database|records|data|files?)\b|\bre-?identif\w*\b|\bidentify (?:the )?"
@@ -167,12 +239,23 @@ ALLOWED_PURPOSES = [
                       r"health authorit\w+|planning)\b"),
     ("official statistics", r"\b(official statistics|statistics office|statistical office|health report)\b"),
     ("education or teaching", r"\b(teaching|education\w*|training (?:of )?(?:doctors|nurses|students|GPs)|curricul\w+|"
-                              r"teaching module)\b"),
-    ("scientific research", r"\b(research\w*|study|studies|we study|investigat\w+|analys[ie]s|risk factors?)\b"),
+                              r"teaching module|courses?|lectures?|(?:medical|nursing) (?:school|students)|"
+                              r"train(?:ing)? (?:medical |nursing )?students)\b"),
+    ("scientific research", r"\b(research\w*|study|studies|we study|investigat\w+|analys[ie]s|risk factors?|"
+                            r"scientific\w*|evaluat\w+|assess\w*|burden of|health economic\w*|cost-effectiveness|"
+                            r"real-world (?:evidence|safety|data)|clinical (?:study|trial|evaluation)\w*|"
+                            r"(?:update|develop)\w* (?:clinical )?guidelines)\b"),
+    ("developing products or services", r"\b(medical devices?|in vitro diagnostic|digital health (?:app|application)s?|"
+                                        r"develop\w* (?:a |an |our )?(?:software|app|device|medicine|drug|therapy)|"
+                                        r"product development)\b"),
     ("training and testing algorithms", r"\b(train\w*|validat\w+|test\w*)\b[^.]{0,40}\b(models?|algorithms?|AI|"
                                        r"prediction|classifiers?)\b|\bmachine learning\b|\bprediction (?:model|software)\b"),
     ("improving care", r"\b(improv\w+ (?:the )?(?:care|treatment|delivery)|treatment gap|intervene earlier|patient safety|"
-                       r"better care)\b"),
+                       r"better care|quality of (?:health ?)?care|care quality|optimi[sz]\w* (?:the )?(?:treatment|care)|"
+                       r"treatment optimi[sz]ation|guideline[- ]adheren\w*|adheren\w* to (?:clinical )?guidelines|"
+                       r"follows? (?:the )?guidelines|benchmark\w*|reduc\w+ (?:waiting times|readmissions|admissions)|"
+                       r"optimi[sz]\w*(?: \w+)? (?:treatment|care|therapy|pathways?)|audit\w*|quality (?:team|assurance|"
+                       r"improvement))\b"),
 ]
 
 
@@ -193,6 +276,7 @@ class Decision:
     purposes: list[str]
     staff_flags: list[str]
     reidentification: bool = False  # the applicant states an intent to re-identify or link people
+    hold_for_review: bool = False  # approved in principle, but nothing is released before staff review
 
     def to_dict(self) -> dict:
         return {
@@ -202,6 +286,7 @@ class Decision:
             "purposes": self.purposes,
             "staff_flags": self.staff_flags,
             "reidentification": self.reidentification,
+            "hold_for_review": self.hold_for_review,
             "trace": [f.__dict__ for f in self.trace],
         }
 
@@ -210,9 +295,15 @@ def _snippets(pattern: str, text: str) -> list[str]:
     return [m.group(0) for m in re.finditer(pattern, text, I)]
 
 
+def _with_activities(rules: list[ProhibitedRule]) -> list[ProhibitedRule]:
+    from dataclasses import replace
+    return [replace(r, activities=ACTIVITIES[r.category][0], activity_exceptions=ACTIVITIES[r.category][1])
+            if r.category in ACTIVITIES else r for r in rules]
+
+
 def check_prohibited(text: str) -> list[tuple[ProhibitedRule, list[str]]]:
     hits = []
-    for rule in PROHIBITED:
+    for rule in _with_activities(PROHIBITED):
         if rule.exceptions and re.search(rule.exceptions, text, I):
             # An exception cancels only the trigger/context pairing, not explicit patterns.
             matched = [s for p in rule.patterns for s in _snippets(p, text)
@@ -225,6 +316,13 @@ def check_prohibited(text: str) -> list[tuple[ProhibitedRule, list[str]]]:
                     c = re.search(rule.context, sentence, I)
                     if t and c:
                         matched.append(f"{t.group(0)} … {c.group(0)}")
+        for sentence in re.split(r"(?<=[.!?;])\s+", text):
+            if rule.activity_exceptions and re.search(rule.activity_exceptions, sentence, I):
+                continue
+            for group in rule.activities:
+                found = [re.search(rx, sentence, I) for rx in group]
+                if all(found):
+                    matched.append(" … ".join(f.group(0) for f in found))
         if matched:
             hits.append((rule, list(dict.fromkeys(matched))))
     return hits
@@ -234,8 +332,12 @@ def check_prohibited(text: str) -> list[tuple[ProhibitedRule, list[str]]]:
 PURPOSE_POINTS = {
     "public health": "a", "policy-making": "b", "official statistics": "c", "education or teaching": "d",
     "scientific research": "e", "training and testing algorithms": "e(ii)", "improving care": "f",
+    "developing products or services": "e(i)",
 }
 PUBLIC_ONLY = {"public health", "policy-making", "official statistics"}
+COMMERCIAL = re.compile(
+    r"\b(?:GmbH|AG|KG|OG|Ltd|LLC|Inc|SA|SE|plc|Corp|B\.?V|S\.?r\.?l)\b|\b(?:company|companies|insurer|insurance|"
+    r"versicherung|agency|bank|consultancy|start-?up|brand|chain|retailer|manufacturer|marketing|sales)\b", I)
 PUBLIC_BODY = re.compile(
     r"\b(ministry|ministerium|government|authority|authorities|agency|statistics office|statistical office|"
     r"national statistics|public (?:health )?(?:body|institute|agency|authority|administration)|municipal\w*|"
@@ -284,6 +386,8 @@ def decide(request: dict) -> Decision:
     # Chapter IV prohibits re-identifying the people in the data (recital 54); the pipeline will not
     # grant a secure processing environment to an application that announces it.
     decision.reidentification = bool(_snippets(REIDENTIFICATION.pattern, text))
+    decision.hold_for_review = decision.decision != "REJECT" and any(
+        f.startswith("Held for review:") for f in decision.staff_flags)
     return decision
 
 
@@ -320,7 +424,10 @@ def _decide(request: dict) -> Decision:
     if weak:
         flags.append(f"Possible prohibited-purpose wording ({', '.join(weak)}) did not meet a rule; please check.")
 
-    public_body = bool(PUBLIC_BODY.search(organisation))
+    # A third party working on behalf of a public body counts as that body (Art. 53(2)).
+    public_body = bool(PUBLIC_BODY.search(organisation)) or bool(re.search(
+        r"\b(?:commissioned by|on behalf of|mandated by|contracted by)\s+(?:the\s+)?(?:\w+\s+){0,2}"
+        r"(?:ministry|authority|agency|government|statistics office|social insurance)\b", text, I))
     citable = purposes if public_body else [p for p in purposes if p not in PUBLIC_ONLY]
     if purposes and not citable:
         flags.append(f"Art. 53(2): the purpose ({_join(purposes)}) is reserved for public sector bodies, and "
@@ -329,6 +436,11 @@ def _decide(request: dict) -> Decision:
         dropped = [p for p in purposes if p not in citable]
         flags.append(f"Art. 53(2): {_join(dropped)} {'is' if len(dropped) == 1 else 'are'} reserved for public "
                      "sector bodies; only the other purposes were cited.")
+    commercial = bool(COMMERCIAL.search(organisation)) and not public_body
+    hold = commercial and not citable
+    if hold:
+        flags.append(f"Held for review: '{organisation}' looks like a commercial applicant and no Art. 53(1) purpose "
+                     "open to it was recognised. Nothing is released until staff confirm the purpose.")
     if citable:
         allowed = f"The purpose falls under Art. 53(1): {_cite(citable)}."
     else:

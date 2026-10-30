@@ -114,12 +114,18 @@ class SPEManager:
             self.audit.write("spe_query_refused", request_id, actor, sql=sql)
             raise DownloadBlocked("File and network access are not available inside the SPE. This attempt has been logged.")
         if not re.match(r"^\s*(select|with)\b", sql, re.I) or ";" in sql.strip().rstrip(";"):
+            self.audit.write("spe_query_refused", request_id, actor, sql=sql, error="not a single SELECT statement")
             raise ValueError("Only a single SELECT statement can be run inside the SPE.")
-        with self._connect(request_id) as con:
-            con.execute("SET enable_external_access = false")
-            cur = con.execute(sql.strip().rstrip(";"))
-            cols = [d[0] for d in cur.description]
-            rows = [[str(v) if v is not None else "" for v in r] for r in cur.fetchmany(limit)]
+        try:
+            with self._connect(request_id) as con:
+                con.execute("SET enable_external_access = false")
+                cur = con.execute(sql.strip().rstrip(";"))
+                cols = [d[0] for d in cur.description]
+                rows = [[str(v) if v is not None else "" for v in r] for r in cur.fetchmany(limit)]
+        except duckdb.Error as exc:  # includes DuckDB's own refusal of file and network access
+            self.audit.write("spe_query_refused", request_id, actor, sql=sql,
+                             error=f"{type(exc).__name__}: {str(exc).splitlines()[0][:200]}")
+            raise
         self.audit.write("spe_query", request_id, actor, sql=sql, rows_shown=len(rows))
         return {"columns": cols, "rows": rows}
 

@@ -1,0 +1,19 @@
+{
+  "id": "N02",
+  "submitted": "2026-10-30T10:00:00+01:00",
+  "applicant": {
+    "name": "Mag. Lea Fuchs",
+    "organisation": "Austrian Public Health Institute",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Public health monitoring of acute appendicitis to plan surgical capacity.",
+  "question": "How many patients were admitted with appendicitis as main diagnosis in 2024, and how old are they on average, per region?",
+  "definitions": [
+    "Appendicitis admission = an inpatient encounter whose primary_icd10 starts with K35.",
+    "Only admissions with a start_date in 2024.",
+    "Age = age on 31 December 2025.",
+    "Report per region: patients with at least one appendicitis admission in 2024 and their mean age in years, one decimal."
+  ]
+}

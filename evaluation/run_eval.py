@@ -143,6 +143,7 @@ def privacy_problems(rid: str, record: dict, engine, opted_out: set[str], workdi
 SETS = {
     "official": ("Official sample requests (requests/)", ROOT / "requests"),
     "jury": ("Independent jury-style requests (examples/jury/)", ROOT / "examples" / "jury"),
+    "verifier": ("Second independent verifier (examples/verifier/)", ROOT / "examples" / "verifier"),
 }
 
 
@@ -246,7 +247,7 @@ def evaluate(title: str, requests_dir: Path, out: Path, n_runs: int) -> tuple[st
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", type=int, default=3)
-    ap.add_argument("--sets", default="official,jury", help="comma-separated: " + ", ".join(SETS))
+    ap.add_argument("--sets", default="official,jury,verifier", help="comma-separated: " + ", ".join(SETS))
     ap.add_argument("--requests", help="score this folder (with expected.json) instead of the named sets")
     ap.add_argument("--out", default=str(ROOT / "runs"))
     args = ap.parse_args()

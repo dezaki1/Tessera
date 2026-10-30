@@ -1,0 +1,19 @@
+{
+  "id": "N01",
+  "submitted": "2026-10-30T10:00:00+01:00",
+  "applicant": {
+    "name": "Dr. Paul Wimmer",
+    "organisation": "Medical University cardiology research group",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "We evaluate guideline-adherent treatment of heart failure across hospitals to improve quality of care.",
+  "question": "How many adults with heart failure at each hospital currently take a beta blocker?",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Heart failure = a diagnosis of heart failure.",
+    "Beta blocker = an active beta blocker prescription on 31 December 2025.",
+    "Report per hospital: adults with heart failure, those with an active beta blocker, and the percentage, one decimal."
+  ]
+}

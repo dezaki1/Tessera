@@ -1,0 +1,18 @@
+{
+  "id": "N04",
+  "submitted": "2026-10-30T10:00:00+01:00",
+  "applicant": {
+    "name": "Prof. Martin Gruber",
+    "organisation": "Johannes Kepler University, Institute of Respiratory Care Research",
+    "country": "AT"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "We study inhaler treatment of COPD patients across Austria for a scientific publication.",
+  "question": "How many patients with COPD currently use a long-acting inhaler, per region?",
+  "definitions": [
+    "COPD = any condition with an ICD-10 code starting with J44.",
+    "Long-acting inhaler = active prescription with ATC code starting with R03.",
+    "Report per region: patients with COPD, those with an active long-acting inhaler, and the percentage, one decimal."
+  ]
+}

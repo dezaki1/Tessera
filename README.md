@@ -43,6 +43,11 @@ with plain pandas (no app code):
 
 Before the fixes described under "Independent review" below, only 3 of these 8 were fully correct.
 
+A third set, `examples/verifier/`, comes from a second independent verifier that never saw the code: plain-English
+terms, stays by `primary_icd10`, a justified SPE (cohort 505), and two prohibited purposes in new wording.
+Score: decisions 8/8, numbers 6/6, privacy leaks 0, consistency 8/8. Before the fix in the next section, it
+approved the two prohibited ones (6/8).
+
 How the checks work:
 
 - **Correct numbers.** Every expected value must appear under its group, as the README defines it.
@@ -99,7 +104,30 @@ reproduced before it was fixed:
   ("breast cancer (ICD-10 C50*)"), the privacy legend sits above the table with a count of protected values,
   the SPE decision explains its cohort, and the staff tables scroll on phones.
 
-`tests/test_review_findings.py` holds a regression test for every finding. In total 299 tests pass.
+`tests/test_review_findings.py` holds a regression test for every finding.
+
+**Second verifier.** A second independent verifier found five more problems, all reproduced and fixed
+(`tests/test_verifier_findings.py`):
+
+1. **The purpose check missed plain business wording**, such as "online ads for our weight-loss shake",
+   "recalibrate the regional tariffs of our private health cover", or "our HR department … when hiring
+   staff". Before the fix, 0 of its 7 wordings and 4 of 30 new prohibited texts (`tests/test_purpose_business.py`)
+   were rejected. The rules now match the activity itself (ads, marketing, promotion; premiums, tariffs,
+   cover, contracts, "what customers pay"; hiring, HR) in any word order. As a fail-safe, a commercial
+   applicant (GmbH, AG, company, insurer…) whose purpose matches no Art. 53(1) purpose open to it gets
+   nothing released until staff review it. After the fix: 7/7 and 28/30 rejected, 2/30 held for review,
+   none released. Of 30 legitimate business purposes, 28 are released and 2 borderline ones are held
+   (none is rejected). "Quality of care", "treatment optimisation" and "guideline adherence" now count as
+   Art. 53(1)(f).
+2. **Request ids.** A resubmission with a used id could replace an earlier result and its SPE. Now it is
+   stored under a new id ("R05-2") and the earlier one is never touched.
+3. **An invalid id gave HTTP 500.** Now it returns a clear 422.
+4. **Not every refused SPE query was audited.** Every refused SPE query is now written to the audit log,
+   including errors raised by DuckDB.
+5. **Statistics applicants saw an internal note about the SPE cohort.** That note is gone, and a reason
+   no longer says "answered" while the answer is held.
+
+In total 390 tests pass.
 
 ## Run it
 
@@ -196,8 +224,11 @@ patient. Opted-out patients are excluded from every number, denominator and SPE 
   paths are unit-tested; a live call stops at authentication.
 - **No login.** This is a demo. The staff desk and SPE workspaces are open to anyone who has the URL. A real
   access body would authenticate staff and tie each SPE to its permit holder.
-- **Public-body check is a heuristic.** Art. 53(2) reserves points (a)–(c) for public sector bodies. The app
-  guesses from the organisation name and only flags the case for staff; it never rejects on that basis.
+- **Public-body and commercial checks are heuristics.** Art. 53(2) reserves points (a)–(c) for public sector
+  bodies. The app guesses from the organisation name (and phrases like "commissioned by the ministry"). A
+  commercial applicant with no matching purpose is held for staff review; nobody is rejected on that basis.
+- **Purpose wording still matters.** The purpose rules plus the fail-safe stopped every prohibited text
+  tested, but a non-commercial applicant using wording the rules don't know would still be approved.
 - **Rule-only purpose classification.** It catches the sample cases and the tested variants, but new wording
   can slip past it. Weak signals are flagged to staff rather than decided.
 - **Rule parser coverage.** It covers counts, percentages and means (of the latest measurement, age or

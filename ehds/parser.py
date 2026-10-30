@@ -157,6 +157,8 @@ class ParsedRequest:
     patient_level_output: bool = False
     assumptions: list[str] = field(default_factory=list)
     unresolved: list[str] = field(default_factory=list)
+    # Problems with the SPE cohort only matter (and are only shown) if an SPE is granted.
+    cohort_unresolved: list[str] = field(default_factory=list)
     concepts: dict[str, str] = field(default_factory=dict)
     method: str = "rules"
 
@@ -168,6 +170,7 @@ class ParsedRequest:
             "patient_level_output": self.patient_level_output,
             "assumptions": list(self.assumptions),
             "unresolved": list(self.unresolved),
+            "cohort_unresolved": list(self.cohort_unresolved),
             "concepts": dict(self.concepts),
         }
 
@@ -310,7 +313,7 @@ class _Context:
             try:
                 r.cohort = self._cohort()
             except _Unresolved as exc:
-                r.unresolved.append(f"Cohort for a secure processing environment: {exc}")
+                r.cohort_unresolved.append(str(exc))
         return r
 
     def _sentences(self) -> list[str]:

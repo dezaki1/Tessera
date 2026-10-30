@@ -1,0 +1,19 @@
+{
+  "id": "N08",
+  "submitted": "2026-10-30T10:00:00+01:00",
+  "applicant": {
+    "name": "Dr. Karl Huber",
+    "organisation": "Ministry of Health, emergency care planning unit",
+    "country": "AT"
+  },
+  "requested_as": "health data request",
+  "requested_format": "anonymised statistics",
+  "purpose": "Planning of emergency department capacity in public hospitals.",
+  "question": "How many emergency visits did each hospital have per year?",
+  "definitions": [
+    "Emergency visit = encounter with type 'emergency'.",
+    "The year of a visit is the calendar year of its start_date.",
+    "Count visits, not patients.",
+    "Report per hospital and year (2023, 2024, 2025): number of emergency visits."
+  ]
+}

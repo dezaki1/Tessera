@@ -153,6 +153,7 @@ class HybridParser:
             assumptions=parsed.assumptions + [f"Interpreted with {MODEL} ({how}); staff should confirm."]
                         + interpretation.assumptions,
             unresolved=list(interpretation.cannot_interpret),
+            cohort_unresolved=[] if interpretation.cohort else parsed.cohort_unresolved,
             concepts=parsed.concepts,
             method=how,
         )

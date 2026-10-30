@@ -1,0 +1,213 @@
+{
+  "N01": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Klinikum Nord": {
+        "adults_with_heart_failure": 114,
+        "with_active_beta_blocker": 78,
+        "pct": 68.4
+      },
+      "Klinikum Süd": {
+        "adults_with_heart_failure": 116,
+        "with_active_beta_blocker": 68,
+        "pct": 58.6
+      },
+      "Klinikum West": {
+        "adults_with_heart_failure": 64,
+        "with_active_beta_blocker": 46,
+        "pct": 71.9
+      }
+    }
+  },
+  "N02": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Burgenland": {
+        "patients": "<10",
+        "mean_age": "suppressed"
+      },
+      "Kärnten": {
+        "patients": "<10",
+        "mean_age": "suppressed"
+      },
+      "Niederösterreich": {
+        "patients": 17,
+        "mean_age": 32.6
+      },
+      "Oberösterreich": {
+        "patients": 14,
+        "mean_age": 28.3
+      },
+      "Salzburg": {
+        "patients": "<10",
+        "mean_age": "suppressed"
+      },
+      "Steiermark": {
+        "patients": 15,
+        "mean_age": 39.9
+      },
+      "Tirol": {
+        "patients": "<10",
+        "mean_age": "suppressed"
+      },
+      "Vorarlberg": {
+        "patients": "<10",
+        "mean_age": "suppressed"
+      },
+      "Wien": {
+        "patients": 14,
+        "mean_age": 28.9
+      }
+    }
+  },
+  "N03": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "female": {
+        "patients_with_egfr": 219,
+        "mean_latest_egfr": 44.7,
+        "low_kidney_function": 106,
+        "pct_low": 48.4
+      },
+      "male": {
+        "patients_with_egfr": 195,
+        "mean_latest_egfr": 44.7,
+        "low_kidney_function": 95,
+        "pct_low": 48.7
+      }
+    }
+  },
+  "N04": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "66",
+      "69"
+    ],
+    "answer": {
+      "Burgenland": {
+        "patients_with_copd": 12,
+        "with_active_inhaler": "<10",
+        "pct": "suppressed"
+      },
+      "Kärnten": {
+        "patients_with_copd": 20,
+        "with_active_inhaler": 11,
+        "pct": 55.0
+      },
+      "Niederösterreich": {
+        "patients_with_copd": 66,
+        "with_active_inhaler": 34,
+        "pct": 51.5
+      },
+      "Oberösterreich": {
+        "patients_with_copd": 60,
+        "with_active_inhaler": 36,
+        "pct": 60.0
+      },
+      "Salzburg": {
+        "patients_with_copd": 20,
+        "with_active_inhaler": 10,
+        "pct": 50.0
+      },
+      "Steiermark": {
+        "patients_with_copd": 44,
+        "with_active_inhaler": 21,
+        "pct": 47.7
+      },
+      "Tirol": {
+        "patients_with_copd": 34,
+        "with_active_inhaler": 19,
+        "pct": 55.9
+      },
+      "Vorarlberg": {
+        "patients_with_copd": 13,
+        "with_active_inhaler": "<10",
+        "pct": "suppressed"
+      },
+      "Wien": {
+        "patients_with_copd": 72,
+        "with_active_inhaler": 44,
+        "pct": 61.1
+      }
+    }
+  },
+  "N05": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "N06": {
+    "decision": "REJECT",
+    "articles": [
+      "54"
+    ]
+  },
+  "N07": {
+    "decision": "APPROVE_SPE",
+    "articles": [
+      "53",
+      "66",
+      "68",
+      "73"
+    ],
+    "answer": {
+      "cohort_size": 505
+    }
+  },
+  "N08": {
+    "decision": "APPROVE_STATISTICAL",
+    "articles": [
+      "53",
+      "69"
+    ],
+    "answer": {
+      "Klinikum Nord": {
+        "2023": {
+          "emergency_visits": 481
+        },
+        "2024": {
+          "emergency_visits": 464
+        },
+        "2025": {
+          "emergency_visits": 461
+        }
+      },
+      "Klinikum Süd": {
+        "2023": {
+          "emergency_visits": 391
+        },
+        "2024": {
+          "emergency_visits": 410
+        },
+        "2025": {
+          "emergency_visits": 369
+        }
+      },
+      "Klinikum West": {
+        "2023": {
+          "emergency_visits": 243
+        },
+        "2024": {
+          "emergency_visits": 266
+        },
+        "2025": {
+          "emergency_visits": 272
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "N07",
+  "submitted": "2026-10-30T10:00:00+01:00",
+  "applicant": {
+    "name": "Dr. Nina Hartl",
+    "organisation": "Psychiatric research group, Medical University",
+    "country": "AT"
+  },
+  "requested_as": "health data access application",
+  "requested_format": "pseudonymised records",
+  "purpose": "We develop a model that predicts weight change during antidepressant treatment. Aggregated tables cannot capture each patient's trajectory over time, so we need patient-level records in a secure processing environment. Only model parameters will leave it.",
+  "question": "Provide pseudonymised medications and observations of adults with depression who currently take sertraline.",
+  "definitions": [
+    "Adult = aged 18 or older on 31 December 2025.",
+    "Depression = any condition with an ICD-10 code starting with F32.",
+    "Sertraline = active prescription with ATC code N06AB06.",
+    "Cohort = adults with depression and an active sertraline prescription.",
+    "Records: medications and observations of the cohort.",
+    "Report the number of patients in the cohort."
+  ]
+}
