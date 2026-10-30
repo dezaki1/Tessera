@@ -106,7 +106,7 @@ def test_plural_persons_matches_defined_person_concept(body):
 def test_unrecognised_purpose_is_not_called_allowed():
     d = decide({"purpose": "We are curious about our competitors.", "question": "How many?",
                 "requested_as": "health data request"})
-    assert "is an allowed purpose" not in d.reason and "could not match" in d.reason
+    assert "is an allowed purpose" not in d.reason and "did not match" in d.reason
 
 
 @pytest.mark.parametrize("rid, point", [("R02", "54(b)"), ("R04", "54(c)"), ("R06", "54(a) and (b)"), ("R10", "54(d)")])

@@ -152,35 +152,40 @@ ACTIVITIES = {
         (
             (r"\bads\b|\b(?:online|digital|targeted|social media|tv|print|banner|search)\s+ads?\b|\badvert\w*",),
             (r"\b(?:billboards?|tv spots?|commercials|influencers?|direct mail|mail(?:ing)?s?\b|coupons?|"
-             r"sponsor\w*|lead lists?|sales reps?|social media push)\b",),
+             r"lead lists?|sales reps?|social media push)\b",),
             (r"\bmarketing\b",),
             (r"\bmarket (?:our|the|their|its|a|this)\b",),
             (r"\b(?:boost|increase|grow)\w* (?:our |their )?sales\b|\bsell (?:more|best)\b",),
             (r"\bpromot(?:e|es|ing|ion)\b(?!\s+(?:of\s+)?(?:public\s+)?health)", _SELLING),
             (r"\b(?:campaigns?|newsletters?|target\w*|reach|place|position\w*|push)\b", _SELLING),
         ),
-        r"\bmarketing authori[sz]ation\b|\bpost-marketing\b|\bhealth promotion\b|\b(?:vaccination|prevention|"
-        r"awareness|screening|public health)\s+campaigns?\b|\btarget population\b|\bclinical (?:trial|study|evaluation)\b",
+        r"\bmarketing authori[sz]ation\b|\bpost-marketing\b|\bhealth[- ]promotion\b|\bsocial marketing\b|"
+        r"\b(?:vaccination|prevention|awareness|screening|public health)\s+(?:programme\s+|program\s+)?campaigns?\b|"
+        r"\bfree (?:national )?(?:\w+ )?(?:prevention|screening|vaccination) (?:programme|program)\b|\btarget population\b|\bclinical (?:trial|study|evaluation)\b",
     ),
     "insurance or credit": (
         (
-            (r"\b(?:insur\w*|health (?:plan|cover)|private cover|dental plan|policy ?holders?|underwrit\w*|"
+            (r"\b(?:insur\w*|health (?:plans?|cover)|private cover|dental plans?|policy ?holders?|underwrit\w*|"
              r"actuar\w*|sickness fund|health fund)\b",
              r"\b(?:premiums?|tariffs?|pric(?:e|es|ing)|surcharges?|deductibles?|(?:monthly )?fees?|loadings?|"
              r"eligibility|renewal|terms|contracts?|cover\b|coverage|exclud\w+|refus\w+|charg\w+|"
              r"what (?:\w+ ){0,3}pay|raise|increase|recalibrat\w*)\b"),
             (r"\b(?:banks?|lenders?|leasing|mortgages?|loans?|credit)\b",
              r"\b(?:approv\w+|grant\w*|decid\w+|factor\w*|terms|rates?|eligib\w*|check\w*|refus\w+|scor\w+)\b"),
+            (r"\b(?:residents|tenants|members|customers|clients)\b",
+             r"\b(?:shorter|higher|stricter)\b", r"\b(?:contracts?|fees?|rents?|renewals?|prices?|rates?)\b"),
             (r"\b(?:members|customers|clients|subscribers)\b",
              r"\b(?:surcharges?|higher (?:fees|prices|rates|premiums|deductibles)|charg\w+ (?:more|extra|higher))\b"),
         ),
         r"\b(?:research department|publish\w*|study on (?:the )?outcomes|disease management programme|"
-        r"forecast\w*|budget|evaluat\w+ whether)\b",
+        r"forecast\w*|budget|evaluat\w+ whether|coverage gaps?|consumer protection)\b",
     ),
     "employment decisions": (
         (
             (r"\b(?:HR|human resources)\b",),
             (r"\bhir(?:e|es|ing)\b",),
+            (r"\b(?:payroll|let go|lay(?:ing)? off|layoffs?|retir(?:e|ing) (?:members|staff|employees|workers)|"
+             r"from active duty|(?:coaches|employees|staff|workers) (?:stay|remain)\b)",),
             (r"\b(?:recruit\w*|staffing|job applicants?|applicants|candidates)\b",
              r"\b(?:screen\w*|rank\w*|shortlist\w*|select\w*|reject\w*|harder|avoid\w*|filter\w*)\b"),
             (r"\b(?:employees?|staff|workers?|team leads?|personnel)\b",
@@ -190,24 +195,32 @@ ACTIVITIES = {
         ),
         r"\b(?:occupational (?:health|disease|safety)|burnout|working conditions|well-?being|health promotion|"
         r"(?:trial|study) participants|patients for (?:the|a|our) (?:trial|study)|hiring (?:of )?(?:nurses|doctors|"
-        r"physicians|health(?:care)? (?:staff|workers)))\b",
+        r"physicians|health(?:care)? (?:staff|workers))|(?:trial|study) sites|select\w* (?:\w+ )?sites|"
+        r"recruit\w* (?:patients|participants|volunteers)|drug candidates|candidate (?:drugs|compounds|molecules)|"
+        r"hir\w* (?:a |an )?(?:statistician|data scientist|analyst|researcher|epidemiologist)|"
+        r"(?:need|needed|would need) to hire|staffing (?:study|levels|needs)|caseloads?)\b",
     ),
     "harmful products": (
         (
-            (r"\b(?:energy drinks?|caffeine|casinos?|slot machines?|betting|gambl\w*|vap(?:e|es|ing)|e-?cig\w*|"
-             r"nicotine|tobacco|alcohol\w*|beer|spirits|liquor|weapons?|firearms?)\b",
+            (r"\b(?:energy drinks?|caffeine|casinos?|slot[- ]machines?|loot ?box\w*|betting|gambl\w*|vap(?:e|es|ing)|"
+             r"e-?cig\w*|nicotine|tobacco|alcohol\w*|beer|spirits|liquor|vodka|gin|whisk(?:e)?y|rum|schnapps|"
+             r"weapons?|firearms?|pistols?|rifles?|guns?|ammunition|psychoactive|recreational (?:drugs?|compounds?)|"
+             r"narcotics?)\b",
              r"\b(?:design\w*|develop\w*|produc\w+|sell\w*|reach|market\w*|launch\w*|flavou?r\w*|find our|"
-             r"customers?|players?|brand)\b"),
+             r"customers?|players?|brand|creat\w+|build\w*|formulat\w+|position\w*|aimed at|user base|tasting)\b"),
         ),
         r"\b(?:cessation|quit\w*|stop smoking|nicotine replacement|harms? of|addiction treatment|prevent\w*|"
         r"tobacco control|public health|epidemiolog\w+)\b",
     ),
     "decisions against individuals": (
         (
-            (r"\b(?:refus\w+|deny\w*|avoid\w*|reject\w*|declin\w+|exclud\w+|turn away)\b",
-             r"\b(?:rent\w*|flats?|apartments?|tenants?|memberships?|members|customers?|applicants?|service)\b"),
+            (r"\b(?:refus\w+|deny\w*|avoid\w*|reject\w*|declin\w+|exclud\w+|turn(?:ed)? (?:them |people )?away|"
+             r"ban(?:ned|s)?|stricter|priority)\b",
+             r"\b(?:rent\w*|flats?|apartments?|tenan\w+|households?|memberships?|members|customers?|applicants?|"
+             r"service|admissions?|families|pool|gym|classes|clubs?|renewals?)\b"),
         ),
-        r"\b(?:avoid\w* (?:falls|admissions|readmissions|complications|strokes|harm)|exclusion criteria|"
+        r"\b(?:avoid\w* (?:falls|admissions|readmissions|complications|strokes|harm)|avoidable (?:hospital )?"
+        r"(?:admissions|readmissions|hospitali[sz]ations)|hospital admissions|exclusion criteria|"
         r"from the (?:analysis|study|cohort))\b",
     ),
 }
@@ -227,6 +240,8 @@ SPE_JUSTIFICATION = [
     r"\b(?:individual|patient|person)[- ]level\s+(?:sequences?|histories|trajectories|timelines|time series)\b",
     r"\b(aggregates?|aggregated data|statistics|summary data|summary statistics|anonymi[sz]ed (?:data|statistics|counts?))\b"
     r"[^.]{0,40}\b(are|is|would be|will be)\s+(?:not (?:enough|sufficient|adequate)|insufficient)\b",
+    r"\b(aggregates?|aggregated (?:data|tables)|summary (?:data|statistics|tables)|statistics)\s+(?:will|would|do|does|"
+    r"can)\s*(?:not|n't)\s+(?:give|show|capture|provide|reveal)\b",
     r"\b(not enough|insufficient|cannot be answered|can ?not be done)\b[^.]{0,40}\b(aggregates?|statistics|aggregated)\b",
     r"\b(needs?|requires?|requiring|need)\b[^.]{0,30}\b(individual|patient|record|person)[- ]level\b",
     r"\b(individual|patient|record|person)[- ]level (?:data|histories|records|trajectories|information) (?:is|are) "
@@ -241,7 +256,7 @@ ALLOWED_PURPOSES = [
     ("education or teaching", r"\b(teaching|education\w*|training (?:of )?(?:doctors|nurses|students|GPs)|curricul\w+|"
                               r"teaching module|courses?|lectures?|(?:medical|nursing) (?:school|students)|"
                               r"train(?:ing)? (?:medical |nursing )?students)\b"),
-    ("scientific research", r"\b(research\w*|study|studies|we study|investigat\w+|analys[ie]s|risk factors?|"
+    ("scientific research", r"\b(research\w*|study|studies|studying|we study|randomi[sz]ed (?:controlled )?trials?|power calculation|investigat\w+|analys[ie]s|risk factors?|"
                             r"scientific\w*|evaluat\w+|assess\w*|burden of|health economic\w*|cost-effectiveness|"
                             r"real-world (?:evidence|safety|data)|clinical (?:study|trial|evaluation)\w*|"
                             r"(?:update|develop)\w* (?:clinical )?guidelines)\b"),
@@ -255,7 +270,7 @@ ALLOWED_PURPOSES = [
                        r"treatment optimi[sz]ation|guideline[- ]adheren\w*|adheren\w* to (?:clinical )?guidelines|"
                        r"follows? (?:the )?guidelines|benchmark\w*|reduc\w+ (?:waiting times|readmissions|admissions)|"
                        r"optimi[sz]\w*(?: \w+)? (?:treatment|care|therapy|pathways?)|audit\w*|quality (?:team|assurance|"
-                       r"improvement))\b"),
+                       r"improvement)|(?:how|whether) (?:well )?(?:\w+ )?care is organi[sz]ed|learn from the best)\b"),
 ]
 
 
@@ -301,6 +316,22 @@ def _with_activities(rules: list[ProhibitedRule]) -> list[ProhibitedRule]:
             if r.category in ACTIVITIES else r for r in rules]
 
 
+# Sentences that describe a public campaign for a free health programme, or research that protects
+# consumers from a prohibited practice, are not that practice, even when they name it.
+PATTERN_EXCEPTIONS = {
+    "advertising or marketing": r"\bhealth[- ]promotion\b|\bsocial marketing\b|\bfree (?:national )?(?:\w+ )?"
+                                r"(?:prevention|screening|vaccination) (?:programme|program)\b",
+    "insurance or credit": r"\bconsumer protection\b|\bcoverage gaps?\b",
+}
+
+
+def _sentence_of(snippet: str, text: str) -> str:
+    for sentence in re.split(r"(?<=[.!?;])\s+", text):
+        if snippet in sentence:
+            return sentence
+    return text
+
+
 def check_prohibited(text: str) -> list[tuple[ProhibitedRule, list[str]]]:
     hits = []
     for rule in _with_activities(PROHIBITED):
@@ -323,6 +354,9 @@ def check_prohibited(text: str) -> list[tuple[ProhibitedRule, list[str]]]:
                 found = [re.search(rx, sentence, I) for rx in group]
                 if all(found):
                     matched.append(" … ".join(f.group(0) for f in found))
+        cancel = PATTERN_EXCEPTIONS.get(rule.category)
+        if cancel:
+            matched = [m for m in matched if not re.search(cancel, _sentence_of(m.split(" … ")[0], text), I)]
         if matched:
             hits.append((rule, list(dict.fromkeys(matched))))
     return hits
@@ -341,7 +375,19 @@ COMMERCIAL = re.compile(
 PUBLIC_BODY = re.compile(
     r"\b(ministry|ministerium|government|authority|authorities|agency|statistics office|statistical office|"
     r"national statistics|public (?:health )?(?:body|institute|agency|authority|administration)|municipal\w*|"
-    r"federal|social (?:security|insurance)|health insurance fund|european commission|ECDC|EMA)\b", I)
+    r"federal|social (?:security|insurance)|health insurance fund|european commission|ECDC|EMA|"
+    r"public (?:health |accident |pension )?insur\w+|Landesamt|state health office|Gesundheitsamt|Gesundheitskasse|Sozialversicherung|[ÖO]GK|AUVA|SVS|BVAEB|"
+    r"Land (?:Steiermark|Tirol|Salzburg|Kärnten|Vorarlberg|Burgenland|Niederösterreich|Oberösterreich)|"
+    r"Stadt Wien)\b", I)
+
+# Words that suggest a use the rules may not have recognised. With no citable Art. 53(1) purpose,
+# any of these holds the request for staff review, whoever the applicant is.
+WARNING_WORDS = re.compile(
+    r"\b(?:target\w*|customers?|clients?|members?|membership|applicants?|premiums?|sell\w*|sales|market\w*|"
+    r"campaign\w*|brand\w*|launch\w*|hir(?:e|ing)|employ\w*|staff|workforce|payroll|loans?|interest rates?|"
+    r"fees?|surcharges?|supplement\w*|contracts?|tenan\w+|renewals?|priority|stricter|ban\w*|"
+    r"petition|retir\w+|nicotine|tobacco|alcohol\w*|beer|vodka|newsletters?|players?|games?|pistols?|"
+    r"weapons?|guns?|psychoactive|recreational|compounds?|price\w*|pricing|insur\w+|let go)\b", I)
 
 
 def allowed_purposes(text: str) -> list[str]:
@@ -436,18 +482,22 @@ def _decide(request: dict) -> Decision:
         dropped = [p for p in purposes if p not in citable]
         flags.append(f"Art. 53(2): {_join(dropped)} {'is' if len(dropped) == 1 else 'are'} reserved for public "
                      "sector bodies; only the other purposes were cited.")
-    commercial = bool(COMMERCIAL.search(organisation)) and not public_body
-    hold = commercial and not citable
-    if hold:
+    # Only the name counts, not a description in brackets ("Mieterverein (tenants' association)").
+    commercial = bool(COMMERCIAL.search(re.sub(r"\([^)]*\)", "", organisation))) and not public_body
+    warning = WARNING_WORDS.search(purpose)
+    if not citable and commercial:
         flags.append(f"Held for review: '{organisation}' looks like a commercial applicant and no Art. 53(1) purpose "
                      "open to it was recognised. Nothing is released until staff confirm the purpose.")
+    elif not citable and warning:
+        flags.append(f"Held for review: no Art. 53(1) purpose open to the applicant was recognised and the text "
+                     f"mentions '{warning.group(0)}'. Nothing is released until staff confirm the purpose.")
     if citable:
         allowed = f"The purpose falls under Art. 53(1): {_cite(citable)}."
     else:
         if not purposes:
             flags.append("No Art. 53 purpose was recognised in the purpose text; please confirm it is an allowed purpose.")
-        allowed = ("We could not match the stated purpose to a purpose listed in Art. 53(1); a staff member "
-                   "will review it.")
+        allowed = ("The stated purpose did not match a specific point of Art. 53(1) automatically; staff have been "
+                   "asked to confirm it.")
 
     # 2. Health data request -> statistics
     kind = request_type(request)
